@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Northern Broadcast — We arrange your happiness.</title>
+<style>
+  :root {
+    --bg: #1b1712;
+    --bg-raised: #241f19;
+    --text: #f3ede2;
+    --text-dim: #ada192;
+    --accent: #c04a3a;
+    --accent-2: #c99a4b;
+    --line: #3c342a;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #1b1712; --bg-raised: #241f19; --text: #f3ede2;
+    --text-dim: #ada192; --accent: #c04a3a; --accent-2: #c99a4b; --line: #3c342a;
+  }
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, "Iowan Old Style", "Noto Serif Bengali", "Times New Roman", serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+  header.site {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .wordmark {
+    font-size: 1.5rem;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wordmark svg { width: 28px; height: 28px; flex: none; }
+  .wordmark .bn { color: var(--text); }
+  .wordmark .en { color: var(--text-dim); font-size: 0.85rem; margin-left: 6px; }
+
+  nav.tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "IBM Plex Mono", "Courier New", monospace;
+    font-size: 0.92rem;
+  }
+  nav.tabs button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 8px 4px;
+    margin-right: 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font: inherit;
+  }
+  nav.tabs button[aria-selected="true"] {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  nav.tabs button:focus-visible, a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+  }
+
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel[data-active="true"] { display: block; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 14px; font-weight: 600; }
+  p { line-height: 1.7; color: var(--text); margin: 0 0 16px; max-width: 62ch; }
+  p.dim { color: var(--text-dim); }
+
+  .facts {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "IBM Plex Mono", "Courier New", monospace;
+    font-size: 0.95rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin: 20px 0 24px;
+  }
+  .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; }
+  .facts div + div { border-top: 1px dashed var(--line); }
+  .facts .k { color: var(--text-dim); }
+  .facts .v { color: var(--text); text-align: right; }
+  .day-highlight {
+    background: rgba(192, 74, 58, 0.18);
+    color: var(--accent);
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 3px;
+  }
+
+  .cta {
+    display: inline-block;
+    background: var(--accent);
+    color: #1b1712;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "IBM Plex Mono", "Courier New", monospace;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 12px 22px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  .cta:hover { background: var(--accent-2); }
+  .cta.secondary {
+    background: none;
+    color: var(--accent-2);
+    border: 1px solid var(--accent-2);
+  }
+  .cta.secondary:hover { background: var(--bg-raised); }
+
+  .cta-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; }
+  .placeholder { cursor: default; }
+  .session-block { margin-bottom: 28px; }
+  .session-block + .session-block { border-top: 1px solid var(--line); padding-top: 24px; }
+  .session-block .facts { margin-bottom: 16px; }
+
+  article.news { padding: 18px 0; border-top: 1px solid var(--line); }
+  article.news:first-of-type { border-top: none; padding-top: 0; }
+  article.news h2 { font-size: 1.15rem; margin: 0 0 8px; font-weight: 600; }
+  article.news time { font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--text-dim); }
+
+  .subsection {
+    border-top: 1px solid var(--line);
+    margin-top: 32px;
+    padding-top: 24px;
+  }
+  .subsection h2 { font-size: 1.15rem; margin: 0 0 8px; font-weight: 600; }
+
+  ul.socials { list-style: none; padding: 0; margin: 0; }
+  ul.socials li { border-top: 1px solid var(--line); }
+  ul.socials li:first-child { border-top: none; }
+  ul.socials a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 2px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1.05rem;
+  }
+  ul.socials a:hover { color: var(--accent-2); }
+  ul.socials .handle { font-family: ui-monospace, monospace; color: var(--text-dim); font-size: 0.85rem; }
+
+  footer.site {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <div class="wordmark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="2.2" fill="var(--accent-2)"/>
+        <path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15" stroke="var(--accent-2)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="bn">নর্দার্ন ব্রডকাস্ট</span><span class="en">NORTHERN BROADCAST</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Section">
+    <button role="tab" aria-selected="true" aria-controls="panel-home" id="tab-home">Home</button>
+    <button role="tab" aria-selected="false" aria-controls="panel-about" id="tab-about">About</button>
+    <button role="tab" aria-selected="false" aria-controls="panel-services" id="tab-services">Services</button>
+    <button role="tab" aria-selected="false" aria-controls="panel-events" id="tab-events">Events</button>
+    <button role="tab" aria-selected="false" aria-controls="panel-contact" id="tab-contact">Contact</button>
+  </nav>
+
+  <section id="panel-home" class="panel" data-active="true" role="tabpanel" aria-labelledby="tab-home">
+    <h1>Northern Broadcast</h1>
+    <p><em>We arrange your happiness.</em></p>
+    <p>From concerts and cultural programs to college events and special occasions, Northern Broadcast handles the planning, coordination and execution so you can focus on the experience.</p>
+    <div class="cta-row">
+      <a class="cta" href="#contact" data-go="contact">Plan an Event</a>
+      <a class="cta secondary" href="#events" data-go="events">Explore Our Events</a>
+    </div>
+
+    <div class="subsection">
+      <h2>Updates</h2>
+      <article class="news">
+        <h2>Northern Broadcast</h2>
+        <p class="dim"><strong>Event Management &amp; Concert Production.</strong> Creating memorable concerts, cultural programs and special events with professional planning and coordination.</p>
+      </article>
+      <article class="news">
+        <h2>Our Recent Events</h2>
+        <p class="dim">From college programs and farewell festivals to live music events, Northern Broadcast continues to bring people together through well-organized experiences.</p>
+      </article>
+      <article class="news">
+        <h2>Planning Something Special?</h2>
+        <p class="dim">Have an upcoming concert, college event, cultural program or private occasion? Let Northern Broadcast help turn your idea into an event.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" hidden>
+    <h1>About Northern Broadcast</h1>
+    <p>Northern Broadcast is an event management and concert organizing agency based in Naogaon, Bangladesh.</p>
+    <p>We plan, coordinate and execute concerts, farewell festivals, cultural programs, college and university events, private events and special occasions.</p>
+    <p>We work with artists, bands, venues, production teams, sponsors, volunteers and event partners to bring ideas from concept to execution.</p>
+    <div class="facts">
+      <div><span class="k">Expertise</span><span class="v">Event &amp; Concert Management</span></div>
+      <div><span class="k">Headquarters</span><span class="v">Shomobay Ukilpara R/A, Naogaon Sadar, Naogaon</span></div>
+    </div>
+  </section>
+
+  <section id="panel-services" class="panel" role="tabpanel" aria-labelledby="tab-services" hidden>
+    <h1>What We Do</h1>
+    <article class="news">
+      <h2>Concert Management</h2>
+      <p class="dim">Professional planning and coordination for live concerts, music shows and large-scale performances.</p>
+    </article>
+    <article class="news">
+      <h2>Event Management</h2>
+      <p class="dim">Complete event planning and execution for cultural, educational, corporate and private events.</p>
+    </article>
+    <article class="news">
+      <h2>Artist &amp; Band Booking</h2>
+      <p class="dim">Artist and band coordination, communication and performance arrangements.</p>
+    </article>
+    <article class="news">
+      <h2>Production Coordination</h2>
+      <p class="dim">Coordination with sound, lighting, stage, decoration and technical production teams.</p>
+    </article>
+    <article class="news">
+      <h2>Event Promotion</h2>
+      <p class="dim">Social media campaigns, promotional content, ticketing support and audience engagement.</p>
+    </article>
+    <article class="news">
+      <h2>Sponsorship Management</h2>
+      <p class="dim">Sponsor coordination, branding opportunities and event partnership management.</p>
+    </article>
+  </section>
+
+  <section id="panel-events" class="panel" role="tabpanel" aria-labelledby="tab-events" hidden>
+    <h1>Our Events</h1>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Kaaktaal Live at Naogaon</span></div>
+        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
+        <div><span class="k">Date</span><span class="v">25 December 2024</span></div>
+        <div><span class="k">Band</span><span class="v">Kaaktaal</span></div>
+        <div><span class="k">Venue</span><span class="v">Sunehra Restaurant, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Melodies for Hope Concert 2025</span></div>
+        <div><span class="k">Type</span><span class="v">Charity Concert</span></div>
+        <div><span class="k">Date</span><span class="v">26 December 2025</span></div>
+        <div><span class="k">Band</span><span class="v">Shironamhin</span></div>
+        <div><span class="k">Venue</span><span class="v">Micro Stand, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Obinshshor - NZS '26</span></div>
+        <div><span class="k">Type</span><span class="v">Farewell Festival</span></div>
+        <div><span class="k">Date</span><span class="v">9 January 2026</span></div>
+        <div><span class="k">Band</span><span class="v">Aftermath</span></div>
+        <div><span class="k">Venue</span><span class="v">50 AVE Restaurant Rooftop, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">ADIOS 2.0 - Santahar College '26</span></div>
+        <div><span class="k">Type</span><span class="v">Farewell Festival</span></div>
+        <div><span class="k">Date</span><span class="v">9 January 2026</span></div>
+        <div><span class="k">Band</span><span class="v">Karnival</span></div>
+        <div><span class="k">Venue</span><span class="v">Santahar College Playground, Bogura</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Noboborsher Gaan</span></div>
+        <div><span class="k">Type</span><span class="v">Bengali New Year Festival</span></div>
+        <div><span class="k">Date</span><span class="v">14 April 2026</span></div>
+        <div><span class="k">Band</span><span class="v">Fourth Subject</span></div>
+        <div><span class="k">Venue</span><span class="v">Naogaon Govt. College Playground, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Nobin Boron NGC '26</span></div>
+        <div><span class="k">Type</span><span class="v">Freshers' Reception Festival</span></div>
+        <div><span class="k">Date</span><span class="v">28 June 2026</span></div>
+        <div><span class="k">Band</span><span class="v">Fourth Subject</span></div>
+        <div><span class="k">Venue</span><span class="v">Naogaon Govt. College Playground, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Rajshahi Band Fest Vol-1</span></div>
+        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
+        <div><span class="k">Date</span><span class="v">17 July 2026</span></div>
+        <div><span class="k">Bands</span><span class="v">CYANIDE, DHUSHOR, স্বরে অ, VARIANT, SIX FEET, DRIFT LINE, JOCKER</span></div>
+        <div><span class="k">Venue</span><span class="v">Zilla Parishad Auditorium, Rajshahi</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Bijoy Tarunno Concert 2026</span></div>
+        <div><span class="k">Type</span><span class="v">Outdoor Concert</span></div>
+        <div><span class="k">Date</span><span class="v">On the horizon</span></div>
+        <div><span class="k">Band</span><span class="v">TBA</span></div>
+        <div><span class="k">Venue</span><span class="v">A-Team Field, Naogaon</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Rajshahi Band Fest Vol-2</span></div>
+        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
+        <div><span class="k">Date</span><span class="v">On the horizon</span></div>
+        <div><span class="k">Bands</span><span class="v">TBA</span></div>
+        <div><span class="k">Venue</span><span class="v">Zilla Parishad Auditorium, Rajshahi</span></div>
+      </div>
+    </div>
+    <div class="session-block">
+      <div class="facts">
+        <div><span class="k">Event</span><span class="v">Acoustic Session at Naogaon</span></div>
+        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
+        <div><span class="k">Date</span><span class="v">On the horizon</span></div>
+        <div><span class="k">Artist</span><span class="v">TBA</span></div>
+        <div><span class="k">Venue</span><span class="v">Daffodils School Playground, Naogaon</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-contact" class="panel" role="tabpanel" aria-labelledby="tab-contact" hidden>
+    <h1>Get in touch</h1>
+    <p>Planning a concert, cultural program, college event or special occasion? Get in touch with Northern Broadcast and let's plan it together.</p>
+    <p><a class="cta secondary" href="https://wa.me/8801511588581" target="_blank" rel="noopener">Message us on WhatsApp</a></p>
+
+    <div class="subsection">
+      <h2>Book Northern Broadcast for your event</h2>
+      <p class="dim">If you're arranging an event and need professional event planning, concert management or artist coordination, reach out to our team directly.</p>
+      <ul class="socials">
+        <li><a href="https://www.facebook.com/iAmTheGalib.BD/" target="_blank" rel="noopener"><span>Tasnimul Hasan Galib</span><span class="handle">Facebook</span></a></li>
+        <li><a href="tel:+8801511588581"><span>Phone</span><span class="handle">01511-588581</span></a></li>
+        <li><a href="https://wa.me/8801511588581" target="_blank" rel="noopener"><span>WhatsApp</span><span class="handle">01511-588581</span></a></li>
+        <li><a href="mailto:northernbroadcast.bd@gmail.com"><span>Email</span><span class="handle">northernbroadcast.bd@gmail.com</span></a></li></ul>
+    </div>
+
+    <div class="subsection">
+      <h2>Headquarter — Northern Broadcast</h2>
+      <p class="dim">Shomobay Ukilpara Residential Area<br>Naogaon Sadar, Naogaon<br>Rajshahi, Bangladesh</p>
+    </div>
+
+    <div class="subsection">
+      <h2>Find us online</h2>
+      <ul class="socials">
+        <li><a href="https://www.facebook.com/northern.broadcast/" target="_blank" rel="noopener"><span>Facebook</span><span class="handle">Northern Broadcast</span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="site">
+    Northern Broadcast · Naogaon, Bangladesh<br>We arrange your happiness.<br>© 2026 Northern Broadcast. All rights reserved.
+  </footer>
+
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('nav.tabs button');
+  const panels = document.querySelectorAll('.panel');
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.id === 'tab-' + id)));
+    panels.forEach(p => { p.hidden = true; p.removeAttribute('data-active'); });
+    const panel = document.getElementById('panel-' + id);
+    panel.hidden = false;
+    panel.setAttribute('data-active', 'true');
+    window.scrollTo(0, 0);
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => show(tab.id.replace('tab-', ''))));
+  document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); show(a.dataset.go); }));
+</script>
+</body>
+</html>
