@@ -13,7 +13,7 @@
   const MSG = {
     EVENT_UNAVAILABLE: 'This event is not available.', SALES_CLOSED: 'Ticket sales are closed for this event.',
     PAST_EVENT: 'This event has already taken place.', TBA_EVENT: 'Tickets for this event are not available right now.',
-    INVALID_NAME: 'Please enter your full name.', INVALID_MOBILE: 'Please enter a valid Bangladesh mobile number (e.g. 01XXXXXXXXX).',
+    INVALID_NAME: 'Please enter your full name.', INVALID_MOBILE: 'Please enter a valid Bangladesh WhatsApp number (e.g. 01XXXXXXXXX).',
     INVALID_EMAIL: 'Please enter a valid email address.', EMAIL_REQUIRED: 'Email address is required.', INVALID_QTY: 'Please choose 1 to 10 tickets.',
     INVALID_BKASH_NUMBER: 'Please enter the valid bKash number you paid from.', TXN_REQUIRED: 'Please enter your bKash Transaction ID.',
     AMOUNT_MISMATCH: 'The amount does not match the total. Please enter the exact total amount.',
