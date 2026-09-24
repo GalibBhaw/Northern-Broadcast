@@ -27,7 +27,7 @@
 
   // ---------- mount panels ----------
   const foot = $('footer.site');
-  ['gmt', 'admin', 'verify'].forEach(id => { const s = document.createElement('section'); s.id = 'panel-' + id; s.className = 'panel tx'; s.hidden = true; foot.parentNode.insertBefore(s, foot); });
+  ['admin', 'verify'].forEach(id => { const s = document.createElement('section'); s.id = 'panel-' + id; s.className = 'panel tx'; s.hidden = true; foot.parentNode.insertBefore(s, foot); });
   const P = id => $('#panel-' + id);
   { const tp = $('#panel-tickets'); if (tp) tp.classList.add('tx'); }
   const go = id => window.show(id);
@@ -86,17 +86,17 @@
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
 
   async function openGMT(id) {
-    go('gmt');
-    if (!sb) { P('gmt').innerHTML = note('Online ticketing is being set up. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
-    P('gmt').innerHTML = '<p class="dim">Loading events…</p>';
-    try { await loadEvents(); } catch (e) { P('gmt').innerHTML = note('Could not load events. Please refresh and try again.', 'err'); return; }
+    go('tickets');
+    if (!sb) { P('tickets').innerHTML = note('Online ticketing is being set up. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
+    P('tickets').innerHTML = '<p class="dim">Loading events…</p>';
+    try { await loadEvents(); } catch (e) { P('tickets').innerHTML = note('Could not load events. Please refresh and try again.', 'err'); return; }
     const ev = id && (S.events.find(x => x.id === id) || S.events.find(x => x.code === id));   // event.id is canonical; code kept only as a fallback
     if (ev && buyable(ev)) return start(ev);
     screenList(ev ? note(`${esc(ev.name)}: ${BTN[state(ev)].toLowerCase()}.`) : '');
   }
   function screenList(top = '') {
     const logo = ($('img.logo') || {}).src || '', up = S.events.filter(e => state(e) !== 'past');
-    P('gmt').innerHTML = `<section class="hero-tx">${logo ? `<img class="hero-logo" src="${logo}" alt="Northern Broadcast">` : ''}
+    P('tickets').innerHTML = `<section class="hero-tx">${logo ? `<img class="hero-logo" src="${logo}" alt="Northern Broadcast">` : ''}
       <h1>Live Music Brings People Together</h1><p>Concerts · Events · Unforgettable Moments</p><button class="cta big" id="hero-cta">Get My Ticket →</button></section>
       ${top}<div id="gmt-body"><h2 class="sec">Upcoming Events</h2><p class="dim">Select an event to book your ticket</p>
       ${up.length ? up.map(eventCard).join('') : '<p class="dim">No upcoming events right now. Check back soon.</p>'}</div>
@@ -113,7 +113,7 @@
   }
   function screenInfo() {
     const e = S.ev, pre = state(e) === 'preorder', bk = esc(BK()); let touched = false;
-    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
+    P('tickets').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
       ${pre ? note('<b>Pre-Order</b><br>Your pre-order secures your ticket. The event date will appear on your e-ticket as soon as it is announced.', 'ok') : ''}
       <section class="co-card"><h2 class="co-h">YOUR INFORMATION</h2>
         <label class="field"><span>Full Name *</span><input id="f-n" autocomplete="name" placeholder="Enter your full name"></label>
@@ -126,7 +126,7 @@
         <p class="lbl">Send Money to:</p>
         <div class="bk-num"><b id="bk-n">${bk}</b><button class="cta secondary" id="bk-copy" type="button">Copy Number</button></div>
         <h3 class="co-sub">Payment Instructions</h3>
-        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Send Money”.</li><li>Send the required amount to ${bk}.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
+        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Payment”.</li><li>Make the payment of the required amount to ${bk}.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
       </section>
       <section class="co-card"><h2 class="co-h">PAYMENT DETAILS</h2>
         <label class="field"><span>bKash Sender Number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX"></label>
@@ -167,7 +167,7 @@
     });
     if (error || !data || !data[0]) { out.innerHTML = note(esc(errMsg(error)), 'err'); btn.disabled = false; btn.textContent = 'Submit Payment →'; return; }
     const o = data[0], pre = state(e) === 'preorder';
-    P('gmt').innerHTML = `<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
+    P('tickets').innerHTML = `<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
       <p>Your payment information has been submitted successfully. Our team will verify your transaction.</p></div>
       ${facts([['Order ID', o.order_id], ['Event', o.event_name], ['Event date', fmtD(e.event_date)], ['Name', o.customer_name], ['Tickets', o.ticket_quantity], ['Total amount', tk(o.total_amount)], ['Status', 'Pending']])}
       <p class="dim">Save your Order ID. Use it with your mobile number under “Find your ticket” to check your status.${pre ? ' Your ticket will show “To Be Announced” until the date is confirmed.' : ''}</p>
@@ -330,8 +330,8 @@
 
   // ---------- PUBLIC TICKETS PAGE (from the Supabase events table) ----------
   async function renderTickets() {
-    if (!sb) return;
-    try { await loadEvents(); } catch (e) { return; }          // keep the static fallback if the database is unreachable
+    if (!sb) { P('tickets').innerHTML = note('Online ticketing is not configured yet. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
+    try { await loadEvents(); } catch (e) { P('tickets').innerHTML = note('Could not load ticket events. Please refresh and try again.', 'err'); return; }
     const up = S.events.filter(e => state(e) !== 'past');
     P('tickets').innerHTML = '<h1>Tickets</h1><p class="dim">Select an event to book your ticket</p>' + (up.length ? up.map(eventCard).join('') : '<p class="dim">No upcoming events right now. Check back soon.</p>');
   }
@@ -344,7 +344,6 @@
   }
   document.addEventListener('click', e => { const a = e.target.closest('[data-eid],[data-buy]'); if (a) { e.preventDefault(); openGMT(a.dataset.eid || a.dataset.buy); } });
   const tt = $('#tab-tickets'); if (tt) tt.addEventListener('click', renderTickets);
-  const gt = $('#tab-gmt'); if (gt) gt.addEventListener('click', () => openGMT());
   window.addEventListener('hashchange', route);
   route();
   renderTickets();
