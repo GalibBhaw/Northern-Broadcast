@@ -83,7 +83,6 @@
       <div class="ev-foot"><b class="price">${tk(PRICE)} <small>/ ticket</small></b>
       ${buyable(e) ? `<button class="cta" data-eid="${e.id}">${BTN[s]} →</button>` : `<span class="pill">${BTN[s]}</span>`}</div></div></article>`;
   };
-  const steps = n => `<ol class="steps">${['Event', 'Information', 'Payment', 'Done'].map((t, i) => `<li class="${i + 1 < n ? 'done' : i + 1 === n ? 'on' : ''}"><i>${i + 1}</i><span>${t}</span></li>`).join('')}</ol>`;
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
 
   async function openGMT(id) {
@@ -113,64 +112,62 @@
     screenInfo();
   }
   function screenInfo() {
-    const e = S.ev, pre = state(e) === 'preorder', F = S.f;
-    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${steps(2)}<h2 class="sec">Your Information</h2>${mini(e)}
+    const e = S.ev, pre = state(e) === 'preorder', bk = esc(BK()); let touched = false;
+    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
       ${pre ? note('<b>Pre-Order</b><br>Your pre-order secures your ticket. The event date will appear on your e-ticket as soon as it is announced.', 'ok') : ''}
-      <label class="field"><span>Full name *</span><input id="f-n" autocomplete="name" value="${esc(F.n)}"></label>
-      <label class="field"><span>Mobile number *</span><input id="f-m" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="tel" value="${esc(F.m)}"></label>
-      <label class="field"><span>Email address *</span><input id="f-e" type="email" autocomplete="email" placeholder="you@example.com" value="${esc(F.e)}"></label>
-      <div class="field"><span>Ticket quantity *</span><div class="qty"><button class="cta secondary" id="qm" aria-label="Fewer">−</button><b id="qn">${S.qty}</b><button class="cta secondary" id="qp" aria-label="More">+</button></div></div>
-      <div class="sum"><div><span>Ticket Price</span><b>${tk(PRICE)}</b></div><div><span>Quantity</span><b id="sq"></b></div><hr><div class="tot"><span>Total Amount</span><b id="stt"></b></div></div>
-      <div id="f-err"></div><button class="cta big" id="f-go"></button>`;
-    const upd = () => { $('#qn').textContent = $('#sq').textContent = S.qty; $('#stt').textContent = tk(PRICE * S.qty); $('#f-go').textContent = `Proceed to Payment · ${tk(PRICE * S.qty)}`; };
+      <section class="co-card"><h2 class="co-h">YOUR INFORMATION</h2>
+        <label class="field"><span>Full Name *</span><input id="f-n" autocomplete="name" placeholder="Enter your full name"></label>
+        <label class="field"><span>Mobile Number *</span><input id="f-m" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
+        <label class="field"><span>Email Address *</span><input id="f-e" type="email" autocomplete="email" placeholder="Enter your email address"></label>
+        <div class="field" style="margin-bottom:0"><span>Number of Tickets *</span><div class="qty"><button class="cta secondary" id="qm" aria-label="Fewer tickets">−</button><b id="qn">1</b><button class="cta secondary" id="qp" aria-label="More tickets">+</button></div></div>
+      </section>
+      <section class="co-card bk-hl"><h2 class="co-h">PAY VIA bKASH</h2>
+        <div class="total-box"><span>Total amount to pay</span><b id="tt"></b><small id="tq"></small></div>
+        <p class="lbl">Send Money to:</p>
+        <div class="bk-num"><b id="bk-n">${bk}</b><button class="cta secondary" id="bk-copy" type="button">Copy Number</button></div>
+        <h3 class="co-sub">Payment Instructions</h3>
+        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Send Money”.</li><li>Send the required amount to ${bk}.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
+      </section>
+      <section class="co-card"><h2 class="co-h">PAYMENT DETAILS</h2>
+        <label class="field"><span>bKash Sender Number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX"></label>
+        <label class="field"><span>Transaction ID *</span><input id="f-t" autocomplete="off" placeholder="Enter transaction ID"></label>
+        <label class="field"><span>Amount Paid *</span><input id="f-a" type="number" inputmode="numeric" min="0" placeholder="৳250"></label>
+        <div id="f-err"></div>
+        <button class="cta big" id="f-go">Submit Payment →</button>
+        <p class="pend-note">⏳ Your order will remain pending until our team verifies your bKash payment.</p>
+      </section>`;
+    const upd = () => { const t = PRICE * S.qty; $('#qn').textContent = S.qty; $('#tt').textContent = tk(t); $('#tq').textContent = `${S.qty} × ${tk(PRICE)}`; if (!touched) $('#f-a').value = t; };
     upd();
+    $('#f-a').oninput = () => { touched = true; };
     $('#qm').onclick = () => { S.qty = Math.max(1, S.qty - 1); upd(); }; $('#qp').onclick = () => { S.qty = Math.min(10, S.qty + 1); upd(); };
     $('#back').onclick = () => screenList();
-    $('#f-go').onclick = () => {
-      F.n = $('#f-n').value.trim(); F.m = $('#f-m').value.trim(); F.e = $('#f-e').value.trim();
-      const m = F.n.length < 2 ? MSG.INVALID_NAME : !isMob(F.m) ? MSG.INVALID_MOBILE : !F.e ? MSG.EMAIL_REQUIRED : !isMail(F.e) ? MSG.INVALID_EMAIL : '';
-      if (m) { $('#f-err').innerHTML = note(esc(m), 'err'); return; }
-      screenPay();
-    };
-  }
-  function screenPay() {
-    const e = S.ev, pre = state(e) === 'preorder', total = PRICE * S.qty;
-    P('gmt').innerHTML = `<button class="back" id="back">← Back</button>${steps(3)}<h2 class="sec">Payment</h2>
-      <div class="pay-sum">${mini(e)}<div class="pay-tot"><span>Total</span><b>${tk(total)}</b></div></div>
-      <div class="bk-card"><h3><i>1</i> Send Payment to bKash</h3>
-        <p class="dim">Send Money / Payment to</p>
-        <div class="bk-num"><b id="bk-n">${esc(BK())}</b><button class="cta secondary" id="bk-copy">Copy</button></div>
-        <div class="bk-amt"><span>Amount</span><b>${tk(total)}</b></div>
-        <ol class="bk-steps"><li>Open bKash App</li><li>Select Send Money</li><li>Send the exact amount to ${esc(BK())}</li><li>Complete the payment</li><li>Enter the transaction details below</li></ol></div>
-      <div class="bk-card"><h3><i>2</i> Enter Transaction Details</h3>
-        <label class="field"><span>bKash sender number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX"></label>
-        <label class="field"><span>Transaction ID *</span><input id="f-t" autocomplete="off"></label>
-        <label class="field"><span>Amount paid (৳) *</span><input id="f-a" type="number" inputmode="numeric" min="0" value="${total}"></label>
-        <div id="f-err"></div><button class="cta big" id="f-go">${pre ? 'Submit Pre-Order' : 'Submit Payment'}</button>
-        <p class="pend-note">⏳ Your order will remain pending until our team verifies the bKash payment.</p></div>`;
-    $('#back').onclick = screenInfo;
     $('#bk-copy').onclick = ev => {
       const b = ev.currentTarget, n = BK();
-      b.textContent = 'Copied!'; setTimeout(() => { b.textContent = 'Copy'; }, 1600);   // instant feedback, copy runs in the background
+      b.textContent = 'Copied!'; b.classList.add('copied'); setTimeout(() => { b.textContent = 'Copy Number'; b.classList.remove('copied'); }, 1600);
       const fallback = () => { try { const t = document.createElement('textarea'); t.value = n; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } catch (x) {} };
       try { navigator.clipboard.writeText(n).catch(fallback); } catch (x) { fallback(); }
     };
     $('#f-go').onclick = submit;
   }
   async function submit() {
-    const e = S.ev, F = S.f, v = id => $('#' + id).value.trim(), out = $('#f-err'), btn = $('#f-go');
-    const pre = state(e) === 'preorder', label = pre ? 'Submit Pre-Order' : 'Submit Payment', total = PRICE * S.qty;
-    const m = !isMob(v('f-b')) ? MSG.INVALID_BKASH_NUMBER : !v('f-t') ? MSG.TXN_REQUIRED : v('f-a') === '' ? 'Please enter the amount you paid.' :
-      Number(v('f-a')) !== total ? `The amount must match the total (${tk(total)}).` : '';
-    if (m) { out.innerHTML = note(esc(m), 'err'); return; }
+    const e = S.ev, v = id => $('#' + id).value.trim(), out = $('#f-err'), btn = $('#f-go'), total = PRICE * S.qty;
+    const bad = (id, m) => { out.innerHTML = note(esc(m), 'err'); const f = $('#' + id); if (f) { f.focus(); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+    if (v('f-n').length < 2) return bad('f-n', MSG.INVALID_NAME);
+    if (!isMob(v('f-m'))) return bad('f-m', MSG.INVALID_MOBILE);
+    if (!v('f-e')) return bad('f-e', MSG.EMAIL_REQUIRED);
+    if (!isMail(v('f-e'))) return bad('f-e', MSG.INVALID_EMAIL);
+    if (!isMob(v('f-b'))) return bad('f-b', MSG.INVALID_BKASH_NUMBER);
+    if (!v('f-t')) return bad('f-t', MSG.TXN_REQUIRED);
+    if (v('f-a') === '') return bad('f-a', 'Please enter the amount you paid.');
+    if (Number(v('f-a')) !== total) return bad('f-a', `The amount must match the total (${tk(total)}).`);
     btn.disabled = true; btn.textContent = 'Submitting…'; out.innerHTML = '';
     const { data, error } = await sb.rpc('create_order', {
-      p_event_id: e.id, p_name: F.n, p_mobile: norm(F.m), p_email: F.e, p_qty: S.qty,
+      p_event_id: e.id, p_name: v('f-n'), p_mobile: norm(v('f-m')), p_email: v('f-e'), p_qty: S.qty,
       p_bkash_number: norm(v('f-b')), p_txn: v('f-t'), p_amount: Number(v('f-a')), p_client_token: S.tok
     });
-    if (error || !data || !data[0]) { out.innerHTML = note(esc(errMsg(error)), 'err'); btn.disabled = false; btn.textContent = label; return; }
-    const o = data[0];
-    P('gmt').innerHTML = `${steps(5)}<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
+    if (error || !data || !data[0]) { out.innerHTML = note(esc(errMsg(error)), 'err'); btn.disabled = false; btn.textContent = 'Submit Payment →'; return; }
+    const o = data[0], pre = state(e) === 'preorder';
+    P('gmt').innerHTML = `<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
       <p>Your payment information has been submitted successfully. Our team will verify your transaction.</p></div>
       ${facts([['Order ID', o.order_id], ['Event', o.event_name], ['Event date', fmtD(e.event_date)], ['Name', o.customer_name], ['Tickets', o.ticket_quantity], ['Total amount', tk(o.total_amount)], ['Status', 'Pending']])}
       <p class="dim">Save your Order ID. Use it with your mobile number under “Find your ticket” to check your status.${pre ? ' Your ticket will show “To Be Announced” until the date is confirmed.' : ''}</p>

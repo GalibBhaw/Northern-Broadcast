@@ -263,6 +263,25 @@
     .poster { width:104px; min-width:104px; height:140px; }
   }
   @media (max-width:420px) { .ev-card { flex-direction:column; } .ev-card .poster { width:100%; height:190px; } }
+
+  /* ---- checkout form ---- */
+  .co-card { background:var(--tx-card); border:1px solid var(--tx-line); border-radius:18px; padding:20px 18px; margin:16px 0; }
+  .co-h { margin:0 0 16px; font-size:13px; letter-spacing:2.2px; color:var(--tx-blue2); font-weight:700; }
+  .co-sub { margin:20px 0 6px; font-size:16px; }
+  .co-card .field { margin-bottom:16px; } .co-card .field > span { font-size:14px; font-weight:600; color:#c9d3e6; margin-bottom:7px; }
+  .co-card .field input::placeholder { color:#5d6a85; }
+  .bk-hl { border-color:rgba(226,19,110,.65); background:linear-gradient(180deg,rgba(226,19,110,.12),rgba(226,19,110,.03) 55%),var(--tx-card); box-shadow:0 10px 30px rgba(226,19,110,.12); }
+  .bk-hl .co-h { color:#ff5fa8; }
+  .total-box { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; background:rgba(0,0,0,.28); border:1px solid var(--tx-line); border-radius:14px; padding:14px 16px; margin-bottom:18px; }
+  .total-box span { flex:1 1 100%; color:var(--tx-dim); font-size:14px; } .total-box b { font-size:34px; line-height:1.1; } .total-box small { color:var(--tx-dim); font-size:14px; }
+  .lbl { margin:0 0 8px; color:#c9d3e6; font-weight:600; }
+  .bk-num { background:rgba(0,0,0,.35); border-color:rgba(226,19,110,.7); }
+  .bk-num b { font-size:clamp(26px,8vw,36px); letter-spacing:2px; }
+  .bk-num .cta { white-space:nowrap; min-height:44px; padding:10px 16px; } .bk-num .cta.copied { background:var(--tx-green); border-color:var(--tx-green); color:#04140a; }
+  .bk-steps { margin:8px 0 0 20px; color:#c9d3e6; line-height:2; }
+  .co-card .pend-note { margin:16px 0 0; text-align:center; max-width:none; }
+  .co-card p, .total-box { max-width:none; }
+  @media (max-width:420px) { .bk-num { flex-direction:column; align-items:stretch; text-align:center; } .bk-num .cta { width:100%; } .co-card { padding:18px 14px; } }
 </style>
 </head>
 <body>
