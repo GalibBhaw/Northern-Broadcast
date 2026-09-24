@@ -550,5 +550,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script src="ticketing.js"></script>
+<script>
+  // Ticket cards: display the unit as "person" without changing price or checkout logic.
+  (() => {
+    const panel = document.getElementById('panel-tickets');
+    const replaceUnit = () => {
+      if (!panel) return;
+      const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      let node;
+      while (node = walker.nextNode()) nodes.push(node);
+      nodes.forEach(textNode => {
+        if (/ticket/i.test(textNode.nodeValue)) {
+          textNode.nodeValue = textNode.nodeValue.replace(/ticket/gi, 'person');
+        }
+      });
+    };
+    replaceUnit();
+    if (panel) new MutationObserver(replaceUnit).observe(panel, { childList: true, subtree: true });
+  })();
+</script>
 </body>
 </html>
