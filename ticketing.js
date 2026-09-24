@@ -80,7 +80,7 @@
     const s = state(e);
     return `<article class="ev-card">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
       ${e.type ? `<p class="ev-type">${esc(e.type)}</p>` : ''}<p>📅 ${fmtD(e.event_date)}</p>${e.event_time ? `<p>🕐 ${esc(e.event_time)}</p>` : ''}${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}
-      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>/ person</small></b>
+      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>${Number(priceOf(e)) === 250 ? '/ person' : '/ ticket'}</small></b>
       ${buyable(e) ? `<button class="cta" data-eid="${e.id}">${BTN[s]} →</button>` : `<span class="pill">${BTN[s]}</span>`}</div></div></article>`;
   };
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
