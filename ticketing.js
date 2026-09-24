@@ -44,11 +44,25 @@
   }
   function ticketHTML(t) {
     const logo = ($('img.logo') || {}).src || '';
-    return `<div class="ticket"><div class="t-top">${logo ? `<img src="${logo}" alt="Northern Broadcast">` : '<b>NORTHERN BROADCAST</b>'}<span>E-TICKET</span></div>
-      ${t.image ? `<img class="t-img" src="${esc(t.image)}" alt="">` : ''}
-      <h3>${esc(t.event)}</h3>
-      ${facts([['Date', fmtD(t.date)], ['Time', t.time], ['Venue', t.venue], ['Name', t.name], ['Mobile', t.mobile], ['Tickets', t.qty], ['Ticket ID', t.ticket_id]])}
-      <div class="t-qr"><div class="qrbox">${qrSvg(t.token)}</div><small>Scan QR at the entry gate</small></div></div>`;
+    const d = t.date ? new Date(t.date + 'T00:00:00') : null;
+    const pm = d ? [d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(), d.getDate(), d.getFullYear()] : ['DATE', 'TBA', ''];
+    const dateHTML = d ? `<em>${esc(d.toLocaleDateString('en-GB', { weekday: 'long' }))}</em>, ${esc(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }))}` : 'To Be Announced';
+    const cell = (k, v, w) => v != null && v !== '' ? `<div class="nbt-c${w ? ' w' : ''}"><span class="nbt-mono">${k}</span><b>${v}</b></div>` : '';
+    const qty = Number(t.qty) || t.qty;
+    return `<div class="nbticket"><div class="nbt-in">
+      <div class="nbt-h">${logo ? `<img src="${logo}" alt="Northern Broadcast">` : '<b class="nbt-mono" style="color:inherit">NORTHERN BROADCAST</b>'}<b class="nbt-mono">E-TICKET</b></div>
+      <div class="nbt-hero">
+        <div class="nbt-stamp">${t.image ? `<img src="${esc(t.image)}" alt="">` : '<div class="nbt-ph nbt-mono">NB</div>'}
+          <div class="nbt-pm nbt-mono"><i>${esc(pm[0])}</i><b>${esc(pm[1])}</b><i>${esc(pm[2])}</i></div></div>
+        <div class="nbt-t"><small class="nbt-mono">ADMIT ${qty > 1 ? 'GUESTS' : 'ONE'}</small><h3>${esc(t.event)}</h3></div>
+      </div>
+      <div class="nbt-g">
+        ${cell('Date', dateHTML, true)}${cell('Time', esc(t.time))}${cell('Admit', qty ? esc(qty + (qty === 1 ? ' Person' : ' Persons')) : '')}
+        ${cell('Venue', esc(t.venue), true)}${cell('Name', esc(t.name), true)}${cell('Mobile', esc(t.mobile), true)}
+      </div>
+      <div class="nbt-f"><div class="nbt-qr">${qrSvg(t.token)}</div>
+        <div class="nbt-id"><small class="nbt-mono">TICKET ID</small><code>${esc(t.ticket_id)}</code><p>Scan this QR code at the entry gate.</p></div></div>
+    </div></div>`;
   }
   function ticketBlock(t) {
     const html = ticketHTML(t);
@@ -57,7 +71,7 @@
   }
   document.addEventListener('click', e => {
     if (!e.target.closest('[data-print]')) return;
-    const src = e.target.closest('.tkt-wrap').querySelector('.ticket');
+    const src = e.target.closest('.tkt-wrap').querySelector('.nbticket');
     let a = $('#printarea'); if (!a) { a = document.createElement('div'); a.id = 'printarea'; a.className = 'tx'; document.body.appendChild(a); }
     a.innerHTML = ''; a.appendChild(src.cloneNode(true)); window.print();
   });

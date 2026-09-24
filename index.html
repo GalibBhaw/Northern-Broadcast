@@ -212,12 +212,45 @@
   .oc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px; }
   .verdict { font-size:1.6rem; font-weight:700; padding:22px; text-align:center; border:2px solid var(--line); border-radius:8px; margin:20px 0; }
   .verdict.ok { color:#7fc98f; border-color:#7fc98f; } .verdict.warn { color:var(--accent-2); border-color:var(--accent-2); } .verdict.err { color:#e07a6b; border-color:#e07a6b; }
-  .ticket { border:1px solid var(--accent-2); border-radius:12px; padding:18px; background:linear-gradient(160deg,#17130e,#000000); max-width:440px; margin:20px 0; }
-  .t-top { display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px; color:var(--accent-2); letter-spacing:2px; font-size:.8rem; }
-  .t-top img { height:40px; width:auto; } .t-img { width:100%; border-radius:8px; margin-bottom:10px; } .ticket h3 { margin:6px 0 10px; font-size:1.3rem; }
-  .t-qr { text-align:center; margin-top:16px; } .qrbox { background:#fff; padding:10px; width:170px; height:170px; margin:0 auto 6px; border-radius:6px; } .qrbox svg { width:100%; height:100%; display:block; }
+  /* ---- E-ticket: minimalist airmail (postal) design ---- */
+  .nbticket { --paper:#fbf7ee; --ink:#1d1b18; --muted:#7a7366; --red:#b8382c; --blue:#20407f; --rule:rgba(29,27,24,.16);
+    width:100%; max-width:360px; margin:20px 0; padding:9px; border-radius:6px; color:var(--ink); text-align:left;
+    background:repeating-linear-gradient(135deg,var(--red) 0 12px,var(--paper) 12px 20px,var(--blue) 20px 32px,var(--paper) 32px 40px);
+    box-shadow:0 12px 30px rgba(0,0,0,.45); }
+  .nbt-in { background:var(--paper); padding:18px 18px 16px; border-radius:2px; font-family:Georgia,"Iowan Old Style","Noto Serif Bengali","Times New Roman",serif; }
+  .nbt-mono { font-family:ui-monospace,"SF Mono","Cascadia Code","IBM Plex Mono","Courier New",monospace; }
+  .nbt-h { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--rule); }
+  .nbt-h img { height:34px; width:auto; display:block; }
+  .nbt-h b { font-size:10px; font-weight:600; letter-spacing:.28em; color:var(--red); }
+  .nbt-hero { display:flex; gap:16px; align-items:flex-start; padding:16px 0 2px; }
+  .nbt-stamp { position:relative; flex:none; width:112px; padding:9px; background:
+      radial-gradient(circle at 6px 0,var(--paper) 3.5px,transparent 4px) 0 0/12px 8px repeat-x,
+      radial-gradient(circle at 6px 8px,var(--paper) 3.5px,transparent 4px) 0 100%/12px 8px repeat-x,
+      radial-gradient(circle at 0 6px,var(--paper) 3.5px,transparent 4px) 0 0/8px 12px repeat-y,
+      radial-gradient(circle at 8px 6px,var(--paper) 3.5px,transparent 4px) 100% 0/8px 12px repeat-y,#fff;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
+  .nbt-stamp img, .nbt-ph { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; background:var(--ink); }
+  .nbt-ph { display:flex; align-items:center; justify-content:center; color:var(--paper); font-weight:700; letter-spacing:.1em; }
+  .nbt-pm { position:absolute; right:-16px; bottom:-14px; width:56px; height:56px; border:1.5px solid var(--red); border-radius:50%; color:var(--red);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; transform:rotate(-14deg); opacity:.88; background:rgba(251,247,238,.35); }
+  .nbt-pm::after { content:""; position:absolute; inset:3px; border:1px solid var(--red); border-radius:50%; opacity:.6; }
+  .nbt-pm i { font-style:normal; font-size:7.5px; letter-spacing:.14em; } .nbt-pm b { font-size:17px; margin:2px 0; }
+  .nbt-t { min-width:0; flex:1; }
+  .nbt-t small { display:block; font-size:10px; font-weight:600; letter-spacing:.24em; color:var(--muted); margin-bottom:8px; }
+  .nbt-t h3 { margin:0; font-size:18px; line-height:1.2; font-weight:700; letter-spacing:.02em; text-transform:uppercase; overflow-wrap:anywhere; }
+  .nbt-g { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; margin-top:22px; border-top:1px solid var(--rule); }
+  .nbt-c { min-width:0; padding:10px 0; border-bottom:1px dotted rgba(29,27,24,.3); } .nbt-c.w { grid-column:1/-1; }
+  .nbt-c span { display:block; margin-bottom:5px; font-size:9.5px; line-height:1; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+  .nbt-c b { display:block; font-size:14.5px; line-height:1.3; font-weight:600; overflow-wrap:anywhere; } .nbt-c em { font-style:normal; color:var(--red); }
+  .nbt-f { display:flex; align-items:center; gap:16px; margin-top:16px; padding-top:16px; border-top:2px dashed rgba(29,27,24,.32); }
+  .nbt-qr { flex:none; width:116px; height:116px; padding:6px; background:#fff; border:1px solid var(--rule); } .nbt-qr svg { width:100%; height:100%; display:block; }
+  .nbt-id { min-width:0; } .nbt-id small { display:block; font-size:9.5px; font-weight:600; letter-spacing:.2em; color:var(--muted); margin-bottom:5px; }
+  .nbt-id code { display:block; font:600 12.5px/1.3 ui-monospace,"SF Mono","Courier New",monospace; overflow-wrap:anywhere; }
+  .nbt-id p { margin:8px 0 0; font-size:11.5px; line-height:1.4; color:var(--muted); }
   #printarea { display:none; }
-  @media print { .wrap { display:none !important; } #printarea { display:block; } #printarea .ticket { margin:0 auto; -webkit-print-color-adjust:exact; print-color-adjust:exact; } body { background:#fff; } }
+  @page { margin:12mm; }
+  @media print { .wrap { display:none !important; } #printarea { display:block; } html, body { background:#fff !important; margin:0 !important; padding:0 !important; height:auto !important; }
+    #printarea .nbticket { margin:0 auto; box-shadow:none; max-width:340px; break-inside:avoid; page-break-inside:avoid; } #printarea, #printarea * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 
   /* ================= Ticketing UI (scoped to .tx) ================= */
   .tx { --tx-bg:#0a0e17; --tx-card:#111827; --tx-card2:#0d1320; --tx-line:#1f2b45; --tx-blue:#2f6bff; --tx-blue2:#4b82ff; --tx-green:#22c55e; --tx-yellow:#f5b301; --tx-red:#ef4444; --tx-text:#f4f6fb; --tx-dim:#9aa6bd; color:var(--tx-text); font-size:16px; }
@@ -257,7 +290,6 @@
   .pend-note { margin:14px 0 0; padding:12px 14px; border-radius:12px; background:rgba(245,179,1,.1); border:1px solid rgba(245,179,1,.35); color:#f5d27a; font-size:14px; }
   .done-card { text-align:center; padding:20px 0 6px; } .tick { width:64px; height:64px; border-radius:50%; background:rgba(34,197,94,.15); color:var(--tx-green); font-size:34px; display:flex; align-items:center; justify-content:center; margin:0 auto; }
   .lk-box { margin-top:34px; padding-top:10px; border-top:1px solid var(--tx-line); }
-  .tx .ticket { background:linear-gradient(160deg,#14224a,#0a0e17 70%); border:1px solid #27407f; border-radius:20px; box-shadow:0 12px 30px rgba(0,0,0,.45); } .tx .t-top { border-bottom:1px dashed #27407f; color:#93b4ff; } .tx .ticket h3 { font-size:22px; }
   .tx .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; } .tx .stat { background:var(--tx-card); border:1px solid var(--tx-line); border-radius:14px; padding:16px; } .tx .stat b { font-size:26px; }
   .adm { display:grid; grid-template-columns:230px 1fr; gap:22px; align-items:start; } .adm-side { position:sticky; top:12px; background:var(--tx-card); border:1px solid var(--tx-line); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:14px; }
   .adm-brand b { display:block; font-size:17px; } .adm-brand small { color:var(--tx-dim); } .adm-side nav { display:flex; flex-direction:column; gap:4px; } .adm-side nav button, .adm-side .lo { text-align:left; background:none; border:0; color:var(--tx-dim); font:inherit; padding:11px 12px; border-radius:10px; cursor:pointer; } .adm-side nav button.on { background:rgba(47,107,255,.15); color:#fff; } .adm-side .lo { border:1px solid var(--tx-line); text-align:center; }
@@ -398,7 +430,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Kaaktaal Live at Naogaon</span></div>
         <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Wednesday, 25/12/2024</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Wednesday</span>, 25 December, 2024</span></div>
         <div><span class="k">Time</span><span class="v">4:00 PM – 9:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">৳250 / person</span></div>
         <div><span class="k">Band</span><span class="v">Kaaktaal</span></div>
@@ -409,7 +441,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Melodies for Hope Concert 2025</span></div>
         <div><span class="k">Type</span><span class="v">Charity Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Friday, 26/12/2025</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Friday</span>, 26 December, 2025</span></div>
         <div><span class="k">Time</span><span class="v">4:00 PM – 9:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">৳250 / person</span></div>
         <div><span class="k">Band</span><span class="v">Shironamhin</span></div>
@@ -420,7 +452,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Obinshshor – NZS '26</span></div>
         <div><span class="k">Type</span><span class="v">Farewell Festival</span></div>
-        <div><span class="k">Date</span><span class="v">Friday, 09/01/2026</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Friday</span>, 9 January, 2026</span></div>
         <div><span class="k">Time</span><span class="v">6:00 PM – 10:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">৳300 / person</span></div>
         <div><span class="k">Band</span><span class="v">Aftermath</span></div>
@@ -431,7 +463,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">ADIOS 2.0 – Santahar College '26</span></div>
         <div><span class="k">Type</span><span class="v">Farewell Festival</span></div>
-        <div><span class="k">Date</span><span class="v">Friday, 09/01/2026</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Friday</span>, 9 January, 2026</span></div>
         <div><span class="k">Time</span><span class="v">6:00 PM – 10:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">৳500 / person</span></div>
         <div><span class="k">Band</span><span class="v">Karnival</span></div>
@@ -442,7 +474,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Noboborsher Gaan</span></div>
         <div><span class="k">Type</span><span class="v">Bengali New Year Festival</span></div>
-        <div><span class="k">Date</span><span class="v">Tuesday, 14/04/2026</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Tuesday</span>, 14 April, 2026</span></div>
         <div><span class="k">Time</span><span class="v">10:00 AM – 4:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">Free</span></div>
         <div><span class="k">Band</span><span class="v">Fourth Subject</span></div>
@@ -453,7 +485,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Nobin Boron NGC '26</span></div>
         <div><span class="k">Type</span><span class="v">Freshers' Reception Festival</span></div>
-        <div><span class="k">Date</span><span class="v">Sunday, 28/06/2026</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Sunday</span>, 28 June, 2026</span></div>
         <div><span class="k">Time</span><span class="v">10:00 AM – 4:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">Free</span></div>
         <div><span class="k">Band</span><span class="v">Fourth Subject</span></div>
@@ -464,7 +496,7 @@
       <div class="facts">
         <div><span class="k">Event</span><span class="v">Rajshahi Band Fest Vol - 1</span></div>
         <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Friday, 17/07/2026</span></div>
+        <div><span class="k">Date</span><span class="v"><span class="day-highlight">Friday</span>, 17 July, 2026</span></div>
         <div><span class="k">Time</span><span class="v">4:00 PM – 10:00 PM</span></div>
         <div><span class="k">Entry</span><span class="v">৳300 / person</span></div>
         <div><span class="k">Bands</span><span class="v">CYANIDE, DHUSHOR, স্বরে অ, VARIANT, SIX FEET, DRIFT LINE, JOCKER</span></div>
