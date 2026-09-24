@@ -44,11 +44,60 @@
   }
   function ticketHTML(t) {
     const logo = ($('img.logo') || {}).src || '';
-    return `<div class="ticket"><div class="t-top">${logo ? `<img src="${logo}" alt="Northern Broadcast">` : '<b>NORTHERN BROADCAST</b>'}<span>E-TICKET</span></div>
-      ${t.image ? `<img class="t-img" src="${esc(t.image)}" alt="">` : ''}
-      <h3>${esc(t.event)}</h3>
-      ${facts([['Date', fmtD(t.date)], ['Time', t.time], ['Venue', t.venue], ['Name', t.name], ['Mobile', t.mobile], ['Tickets', t.qty], ['Ticket ID', t.ticket_id]])}
-      <div class="t-qr"><div class="qrbox">${qrSvg(t.token)}</div><small>Scan QR at the entry gate</small></div></div>`;
+    const eventTitle = esc(t.event || 'EVENT');
+    const date = esc(fmtD(t.date));
+    const time = esc(t.time || 'To Be Announced');
+    const venue = esc(t.venue || 'To Be Announced');
+    const ticketId = esc(t.ticket_id || 'NB-TICKET');
+    const qr = qrSvg(t.token);
+
+    return `<div class="nb-ticket">
+      <div class="nb-ticket-main">
+        <div class="nb-ticket-header">
+          <div class="nb-brand">
+            ${logo ? `<img src="${logo}" alt="Northern Broadcast">` : '<b>NORTHERN BROADCAST</b>'}
+          </div>
+          <div class="nb-tagline"><span>LIVE MUSIC</span><span>REAL PEOPLE</span><span>BETTER DAYS</span></div>
+          <div class="nb-header-rule"></div>
+          <div class="nb-memory"><span>A NIGHT OF MUSIC</span><span>MEMORIES AND MORE</span></div>
+        </div>
+
+        <div class="nb-event-kicker">EVENT</div>
+        <h3 class="nb-event-title">${eventTitle}</h3>
+
+        <div class="nb-meta">
+          <div class="nb-meta-item">
+            <span class="nb-icon">▣</span>
+            <div><small>DATE</small><b>${date}</b></div>
+          </div>
+          <div class="nb-meta-divider"></div>
+          <div class="nb-meta-item">
+            <span class="nb-icon">◷</span>
+            <div><small>TIME</small><b>${time}</b></div>
+          </div>
+          <div class="nb-meta-divider"></div>
+          <div class="nb-meta-item">
+            <span class="nb-icon">●</span>
+            <div><small>VENUE</small><b>${venue}</b></div>
+          </div>
+        </div>
+
+        <div class="nb-ticket-footer">
+          <div class="nb-organized"><span>ORGANIZED BY</span><b>NORTHERN BROADCAST</b><small>NAOGAON, BANGLADESH</small></div>
+          <div class="nb-footer-rule"></div>
+          <div class="nb-motto">WE ARRANGE YOUR HAPPINESS</div>
+          <div class="nb-footer-rule"></div>
+          <div class="nb-id"><span>TICKET ID</span><b>${ticketId}</b></div>
+        </div>
+      </div>
+
+      <div class="nb-ticket-stub">
+        <div class="nb-entry">GENERAL ENTRY</div>
+        <div class="nb-qr-wrap"><div class="nb-qr">${qr}</div></div>
+        <div class="nb-scan">SCAN AT THE<br>ENTRY GATE</div>
+        <div class="nb-admit">ADMIT ONE</div>
+      </div>
+    </div>`;
   }
   function ticketBlock(t) {
     const html = ticketHTML(t);
@@ -80,7 +129,7 @@
     const s = state(e);
     return `<article class="ev-card">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
       ${e.type ? `<p class="ev-type">${esc(e.type)}</p>` : ''}<p>📅 ${fmtD(e.event_date)}</p>${e.event_time ? `<p>🕐 ${esc(e.event_time)}</p>` : ''}${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}
-      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>${Number(priceOf(e)) === 250 ? '/ person' : '/ ticket'}</small></b>
+      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>'/ person'</small></b>
       ${buyable(e) ? `<button class="cta" data-eid="${e.id}">${BTN[s]} →</button>` : `<span class="pill">${BTN[s]}</span>`}</div></div></article>`;
   };
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
