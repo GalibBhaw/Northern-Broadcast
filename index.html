@@ -180,7 +180,6 @@
   }
 
   /* ---- Get My Ticket / admin ---- */
-  .tabs button.gmt-tab { color: var(--accent-2); }
   .field { display:block; margin:0 0 14px; }
   .field > span { display:block; color:var(--text-dim); font-size:.85rem; margin-bottom:4px; }
   .field input, .field select { width:100%; padding:12px 14px; background:var(--bg-raised); border:1px solid var(--line); color:var(--text); font:inherit; font-size:16px; border-radius:6px; }
@@ -200,36 +199,12 @@
   .oc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px; }
   .verdict { font-size:1.6rem; font-weight:700; padding:22px; text-align:center; border:2px solid var(--line); border-radius:8px; margin:20px 0; }
   .verdict.ok { color:#7fc98f; border-color:#7fc98f; } .verdict.warn { color:var(--accent-2); border-color:var(--accent-2); } .verdict.err { color:#e07a6b; border-color:#e07a6b; }
-  .ticket { margin:20px 0; }
-  .nb-ticket { width:100%; max-width:1200px; aspect-ratio:4/1; min-height:280px; display:grid; grid-template-columns:minmax(0, 3.2fr) minmax(190px, .8fr); overflow:hidden; background:#fff; color:#111; border:2px solid #5b21b6; border-radius:18px; box-shadow:0 12px 32px rgba(30,20,60,.12); position:relative; font-family:Arial,Helvetica,sans-serif; }
-  .nb-main { padding:24px 30px 18px; display:flex; flex-direction:column; min-width:0; }
-  .nb-header { display:grid; grid-template-columns:auto 1fr auto; gap:22px; align-items:center; }
-  .nb-brand img { height:54px; width:auto; display:block; }
-  .nb-brand-copy { font-size:10px; line-height:1.45; letter-spacing:3px; color:#333; border-left:1px solid #aaa; padding-left:18px; }
-  .nb-event-label { font-size:11px; font-weight:700; letter-spacing:4px; color:#5b21b6; }
-  .nb-event-title { margin-top:18px; font-size:clamp(28px,4.2vw,62px); line-height:.92; font-weight:900; letter-spacing:-1.5px; text-transform:uppercase; color:#111; overflow-wrap:anywhere; }
-  .nb-rule { height:2px; background:#5b21b6; width:135px; margin:12px 0 14px; }
-  .nb-meta { display:grid; grid-template-columns:1fr 1fr 1.25fr; gap:18px; }
-  .nb-meta > div, .nb-bottom > div { min-width:0; border-right:1px solid #ddd; padding-right:14px; }
-  .nb-meta > div:last-child, .nb-bottom > div:last-child { border-right:0; }
-  .nb-meta span, .nb-bottom span { display:block; font-size:8px; letter-spacing:3px; color:#5b21b6; margin-bottom:4px; font-weight:700; }
-  .nb-meta b { font-size:13px; line-height:1.2; display:block; overflow-wrap:anywhere; }
-  .nb-bottom { display:grid; grid-template-columns:1.2fr 1fr .5fr 1.25fr; gap:14px; margin-top:auto; padding-top:12px; border-top:1px solid #ddd; }
-  .nb-bottom b { font-size:10px; display:block; overflow-wrap:anywhere; }
-  .nb-footer { display:flex; justify-content:space-between; gap:10px; margin-top:10px; font-size:7px; letter-spacing:2px; color:#333; }
-  .nb-footer em { color:#5b21b6; font-style:normal; font-weight:700; }
-  .nb-stub { border-left:2px dashed #5b21b6; padding:22px 18px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; background:#fff; }
-  .nb-stub:before, .nb-stub:after { content:""; position:absolute; left:-12px; width:22px; height:22px; background:#fff; border:2px solid #5b21b6; border-radius:50%; }
-  .nb-stub:before { top:-12px; } .nb-stub:after { bottom:-12px; }
-  .nb-stub-title { font-size:11px; letter-spacing:4px; font-weight:800; margin-bottom:12px; color:#111; }
-  .nb-qr { background:#fff; padding:7px; border:1px solid #ddd; }
-  .nb-stub .qrbox { width:105px; height:105px; padding:0; margin:0; border-radius:0; background:#fff; }
-  .nb-stub .qrbox svg { width:100%; height:100%; display:block; }
-  .nb-stub small { margin-top:8px; font-size:7px; letter-spacing:2px; color:#333; }
-  .nb-stub strong { margin-top:10px; border:1px solid #5b21b6; color:#5b21b6; padding:7px 20px; font-size:10px; letter-spacing:3px; border-radius:5px; }
+  .ticket { border:1px solid var(--accent-2); border-radius:12px; padding:18px; background:linear-gradient(160deg,#17130e,#000000); max-width:440px; margin:20px 0; }
+  .t-top { display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px; color:var(--accent-2); letter-spacing:2px; font-size:.8rem; }
+  .t-top img { height:40px; width:auto; } .t-img { width:100%; border-radius:8px; margin-bottom:10px; } .ticket h3 { margin:6px 0 10px; font-size:1.3rem; }
+  .t-qr { text-align:center; margin-top:16px; } .qrbox { background:#fff; padding:10px; width:170px; height:170px; margin:0 auto 6px; border-radius:6px; } .qrbox svg { width:100%; height:100%; display:block; }
   #printarea { display:none; }
-  @media (max-width:700px) { .nb-ticket { aspect-ratio:auto; min-height:0; grid-template-columns:1fr; } .nb-main { padding:18px; } .nb-stub { border-left:0; border-top:2px dashed #5b21b6; padding:16px; } .nb-stub:before, .nb-stub:after { display:none; } .nb-event-title { font-size:32px; } }
-  @media print { @page { size:A4 landscape; margin:8mm; } .wrap { display:none !important; } #printarea { display:block; width:100%; } #printarea .ticket { margin:0 auto; width:100%; max-width:none; -webkit-print-color-adjust:exact; print-color-adjust:exact; box-shadow:none; } body { background:#fff !important; } }
+  @media print { .wrap { display:none !important; } #printarea { display:block; } #printarea .ticket { margin:0 auto; -webkit-print-color-adjust:exact; print-color-adjust:exact; } body { background:#fff; } }
 
   /* ================= Ticketing UI (scoped to .tx) ================= */
   .tx { --tx-bg:#0a0e17; --tx-card:#111827; --tx-card2:#0d1320; --tx-line:#1f2b45; --tx-blue:#2f6bff; --tx-blue2:#4b82ff; --tx-green:#22c55e; --tx-yellow:#f5b301; --tx-red:#ef4444; --tx-text:#f4f6fb; --tx-dim:#9aa6bd; color:var(--tx-text); font-size:16px; }
@@ -286,6 +261,8 @@
     .tbl thead { display:none; } .tbl, .tbl tbody, .tbl tr, .tbl td { display:block; width:100%; } .tbl tr { border-top:1px solid var(--tx-line); padding:10px 12px; } .tbl td { border:0; padding:5px 0; display:flex; justify-content:space-between; gap:12px; } .tbl td::before { content:attr(data-l); color:var(--tx-dim); } .tbl td[data-l=""]::before { content:none; }
     .poster { width:104px; min-width:104px; height:140px; }
   }
+  .featured-concert { border-color:rgba(226,19,110,.7); box-shadow:0 10px 30px rgba(226,19,110,.12); }
+  .featured-concert .ev-type { color:#ff5fa8; }
   @media (max-width:420px) { .ev-card { flex-direction:column; } .ev-card .poster { width:100%; height:190px; } }
 
   /* ---- checkout form ---- */
@@ -324,7 +301,6 @@
     <button role="tab" aria-selected="false" aria-controls="panel-events" id="tab-events">Events</button>
     <button role="tab" aria-selected="false" aria-controls="panel-portfolio" id="tab-portfolio">Portfolio</button>
     <button role="tab" aria-selected="false" aria-controls="panel-tickets" id="tab-tickets">Tickets</button>
-    <button role="tab" aria-selected="false" aria-controls="panel-gmt" id="tab-gmt" class="gmt-tab">Get My Ticket</button>
     <button role="tab" aria-selected="false" aria-controls="panel-contact" id="tab-contact">Contact</button>
   </nav>
 
@@ -519,49 +495,7 @@
 
   <section id="panel-tickets" class="panel" role="tabpanel" aria-labelledby="tab-tickets" hidden>
     <h1>Tickets</h1>
-    <h2 style="margin:8px 0 20px">Upcoming Concerts</h2>
-        <div class="session-block">
-      <div class="facts">
-        <div><span class="k">Event</span><span class="v">Bijoy Tarunno Concert 2026</span></div>
-        <div><span class="k">Type</span><span class="v">Outdoor Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Coming Soon</span></div>
-        <div><span class="k">Time</span><span class="v">4:00 PM – 9:00 PM</span></div>
-        <div><span class="k">Entry</span><span class="v">TBA</span></div>
-        <div><span class="k">Band</span><span class="v">TBA</span></div>
-        <div><span class="k">Venue</span><span class="v">A-Team Field, Naogaon</span></div>
-      </div>
-      <div class="cta-row">
-        <span class="pill">Coming Soon</span>
-      </div>
-    </div>
-    <div class="session-block">
-      <div class="facts">
-        <div><span class="k">Event</span><span class="v">Rajshahi Band Fest Vol - 2</span></div>
-        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Coming Soon</span></div>
-        <div><span class="k">Time</span><span class="v">4:00 PM – 10:00 PM</span></div>
-        <div><span class="k">Entry</span><span class="v">TBA</span></div>
-        <div><span class="k">Band</span><span class="v">TBA</span></div>
-        <div><span class="k">Venue</span><span class="v">Zilla Parishad Auditorium, Rajshahi</span></div>
-      </div>
-      <div class="cta-row">
-        <span class="pill">Coming Soon</span>
-      </div>
-    </div>
-    <div class="session-block">
-      <div class="facts">
-        <div><span class="k">Event</span><span class="v">Acoustic Session at Naogaon</span></div>
-        <div><span class="k">Type</span><span class="v">Indoor Concert</span></div>
-        <div><span class="k">Date</span><span class="v">Coming Soon</span></div>
-        <div><span class="k">Time</span><span class="v">4:00 PM – 9:00 PM</span></div>
-        <div><span class="k">Entry</span><span class="v">৳250 / person</span></div>
-        <div><span class="k">Artist</span><span class="v">TBA</span></div>
-        <div><span class="k">Venue</span><span class="v">Daffodils School Playground, Naogaon</span></div>
-      </div>
-      <div class="cta-row">
-        <span class="pill">Coming Soon</span>
-      </div>
-    </div>
+    <p class="dim">Loading ticket events…</p>
   </section>
 
   <section id="panel-contact" class="panel" role="tabpanel" aria-labelledby="tab-contact" hidden>
