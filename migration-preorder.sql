@@ -24,8 +24,8 @@ update public.events set pre_order_enabled = true, sales_enabled = false where c
 -- 4) create_order — same signature and return columns; the frontend call is unchanged.
 --    Rules: price is always 250 x quantity; name, mobile, EMAIL, bKash sender number,
 --    transaction ID and exact amount are all required; duplicate transaction IDs blocked;
---    TBA-date events are orderable only when pre_order_enabled = true;
---    dated events need sales_enabled = true and must not be in the past.
+--    orderable when pre_order_enabled = true (date optional) OR (a date is set AND sales_enabled = true);
+--    past-dated events are never orderable.
 --    Every order starts as PENDING (no free/auto-approved orders any more).
 create or replace function public.create_order(
   p_event_id uuid, p_name text, p_mobile text, p_email text, p_qty int,
@@ -50,12 +50,11 @@ begin
     select * into e from events where id = p_event_id and is_active;
     if not found then raise exception 'EVENT_UNAVAILABLE'; end if;
 
-    if e.event_date is null then
-      if not e.pre_order_enabled then raise exception 'TBA_EVENT'; end if;      -- pre-order mode
-    else
-      if e.event_date < (now() at time zone 'Asia/Dhaka')::date then raise exception 'PAST_EVENT'; end if;
-      if not e.sales_enabled then raise exception 'SALES_CLOSED'; end if;        -- normal sale mode
-    end if;
+    -- past events are never orderable; otherwise an order needs Pre-Order ON (date optional)
+    -- OR a date with Ticket Sales ON
+    if e.event_date is not null and e.event_date < (now() at time zone 'Asia/Dhaka')::date then raise exception 'PAST_EVENT'; end if;
+    if not (e.pre_order_enabled or (e.event_date is not null and e.sales_enabled)) then
+      raise exception 'TBA_EVENT'; end if;
 
     if length(trim(coalesce(p_name,''))) < 2 then raise exception 'INVALID_NAME'; end if;
     if v_mobile !~ '^01[3-9][0-9]{8}$' then raise exception 'INVALID_MOBILE'; end if;
