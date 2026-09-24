@@ -6,8 +6,7 @@
   const sb = window.supabase && C.SUPABASE_URL && !/PASTE/.test(C.SUPABASE_URL)
     ? window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY) : null;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const PRICE = 250;   // default ticket price (BDT) when an event has no entry_price
-  const priceOf = e => Number(e && e.entry_price) > 0 ? Number(e.entry_price) : PRICE;
+  const priceOf = e => Math.max(0, Number(e && e.entry_price) || 0);
   const tk = n => '৳' + Number(n).toLocaleString('en-US');
   const today = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);   // Dhaka date
   const fmtD = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'To Be Announced';
@@ -30,7 +29,6 @@
   const foot = $('footer.site');
   ['gmt', 'admin', 'verify'].forEach(id => { const s = document.createElement('section'); s.id = 'panel-' + id; s.className = 'panel tx'; s.hidden = true; foot.parentNode.insertBefore(s, foot); });
   const P = id => $('#panel-' + id);
-  if (!$('#nb-stepbar-style')) { const st=document.createElement('style'); st.id='nb-stepbar-style'; st.textContent='.stepbar{display:flex;align-items:center;gap:10px;margin:18px 0;padding:10px 14px;border:1px solid var(--line,#2b2822);border-radius:14px;background:rgba(255,255,255,.03);font-size:.9rem}.stepbar b{opacity:.45}.stepbar b.on{opacity:1;color:var(--accent-2,#c99a4b)}.stepbar span{opacity:.45}'; document.head.appendChild(st); }
   { const tp = $('#panel-tickets'); if (tp) tp.classList.add('tx'); }
   const go = id => window.show(id);
   // pre-order works with or without a date; normal sale needs a date + sales ON
@@ -82,7 +80,7 @@
     const s = state(e);
     return `<article class="ev-card">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
       ${e.type ? `<p class="ev-type">${esc(e.type)}</p>` : ''}<p>📅 ${fmtD(e.event_date)}</p>${e.event_time ? `<p>🕐 ${esc(e.event_time)}</p>` : ''}${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}
-      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>/ person</small></b>
+      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>/ ticket</small></b>
       ${buyable(e) ? `<button class="cta" data-eid="${e.id}">${BTN[s]} →</button>` : `<span class="pill">${BTN[s]}</span>`}</div></div></article>`;
   };
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
@@ -109,80 +107,91 @@
     $('#lk-go').onclick = lookup; $('#hero-cta').onclick = () => $('#gmt-body').scrollIntoView({ behavior: 'smooth' });
   }
   function start(ev) {
-    S.ev = ev; S.qty = 1; S.f = { n: '', m: '', e: '', b: '', t: '', a: '' };
+    S.ev = ev; S.qty = 1; S.f = { n: '', m: '', e: '' }; S.step = 1;
     S.tok = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random();
     screenInfo();
   }
+  function steps(active) {
+    return `<ol class="steps" aria-label="Checkout steps">
+      <li class="${active === 1 ? 'on' : 'done'}"><i>1</i>Your Information</li>
+      <li class="${active === 2 ? 'on' : ''}"><i>2</i>Payment</li>
+    </ol>`;
+  }
+  function saveInfo() {
+    const v = id => ($('#' + id) ? $('#' + id).value.trim() : '');
+    S.f.n = v('f-n'); S.f.m = v('f-m'); S.f.e = v('f-e');
+  }
+  function infoValues() {
+    return `value="${esc(S.f.n)}"`;
+  }
   function screenInfo() {
-    const e = S.ev, pre = state(e) === 'preorder', unitPrice = priceOf(e);
-    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
-      <div class="stepbar"><b class="on">1. Your Information</b><span>→</span><b>2. Payment</b></div>
+    const e = S.ev, pre = state(e) === 'preorder';
+    S.step = 1;
+    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}${steps(1)}
       ${pre ? note('<b>Pre-Order</b><br>Your pre-order secures your ticket. The event date will appear on your e-ticket as soon as it is announced.', 'ok') : ''}
       <section class="co-card"><h2 class="co-h">YOUR INFORMATION</h2>
         <label class="field"><span>Full Name *</span><input id="f-n" autocomplete="name" placeholder="Enter your full name" value="${esc(S.f.n)}"></label>
-        <label class="field"><span>Mobile Number *</span><input id="f-m" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" value="${esc(S.f.m)}"></label>
+        <label class="field"><span>WhatsApp Number *</span><input id="f-m" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" value="${esc(S.f.m)}"></label>
         <label class="field"><span>Email Address *</span><input id="f-e" type="email" autocomplete="email" placeholder="Enter your email address" value="${esc(S.f.e)}"></label>
         <div class="field" style="margin-bottom:0"><span>Number of Tickets *</span><div class="qty"><button class="cta secondary" id="qm" aria-label="Fewer tickets">−</button><b id="qn">${S.qty}</b><button class="cta secondary" id="qp" aria-label="More tickets">+</button></div></div>
       </section>
-      <section class="co-card"><div class="total-box"><span>Total amount</span><b id="info-total">${tk(unitPrice * S.qty)}</b><small>${S.qty} × ${tk(unitPrice)}</small></div>
-        <div id="info-err"></div><button class="cta big" id="continue-payment">Continue to Payment →</button>
-      </section>`;
-    $('#qm').onclick = () => { S.qty = Math.max(1, S.qty - 1); $('#qn').textContent = S.qty; $('#info-total').textContent = tk(unitPrice * S.qty); $('.total-box small').textContent = `${S.qty} × ${tk(unitPrice)}`; };
-    $('#qp').onclick = () => { S.qty = Math.min(10, S.qty + 1); $('#qn').textContent = S.qty; $('#info-total').textContent = tk(unitPrice * S.qty); $('.total-box small').textContent = `${S.qty} × ${tk(unitPrice)}`; };
+      <div id="f-err"></div>
+      <button class="cta big" id="to-payment">Proceed to Payment →</button>`;
+    $('#qm').onclick = () => { S.qty = Math.max(1, S.qty - 1); $('#qn').textContent = S.qty; };
+    $('#qp').onclick = () => { S.qty = Math.min(10, S.qty + 1); $('#qn').textContent = S.qty; };
     $('#back').onclick = () => screenList();
-    $('#continue-payment').onclick = () => {
-      S.f.n = $('#f-n').value.trim(); S.f.m = $('#f-m').value.trim(); S.f.e = $('#f-e').value.trim();
-      const bad = (id, m) => { const out = $('#info-err'); out.innerHTML = note(esc(m), 'err'); const f = $('#' + id); if (f) { f.focus(); f.scrollIntoView({ block:'center', behavior:'smooth' }); } };
-      $('#info-err').innerHTML = '';
-      if (S.f.n.length < 2) return bad('f-n', MSG.INVALID_NAME);
-      if (!isMob(S.f.m)) return bad('f-m', MSG.INVALID_MOBILE);
-      if (!S.f.e) return bad('f-e', MSG.EMAIL_REQUIRED);
-      if (!isMail(S.f.e)) return bad('f-e', MSG.INVALID_EMAIL);
+    $('#to-payment').onclick = () => {
+      saveInfo();
+      const out = $('#f-err');
+      if (S.f.n.length < 2) { out.innerHTML = note(esc(MSG.INVALID_NAME), 'err'); $('#f-n').focus(); return; }
+      if (!isMob(S.f.m)) { out.innerHTML = note('Please enter a valid WhatsApp number (e.g. 01XXXXXXXXX).', 'err'); $('#f-m').focus(); return; }
+      if (!S.f.e || !isMail(S.f.e)) { out.innerHTML = note(esc(MSG.INVALID_EMAIL), 'err'); $('#f-e').focus(); return; }
       screenPayment();
     };
   }
   function screenPayment() {
-    const e = S.ev, pre = state(e) === 'preorder', bk = esc(BK()), unitPrice = priceOf(e), total = unitPrice * S.qty;
-    P('gmt').innerHTML = `<button class="back" id="payment-back">← Back to Information</button>${mini(e)}
-      <div class="stepbar"><b>1. Your Information</b><span>→</span><b class="on">2. Payment</b></div>
-      <section class="co-card"><h2 class="co-h">PAYMENT</h2>
-        <div class="total-box"><span>Total amount to pay</span><b>${tk(total)}</b><small>${S.qty} × ${tk(unitPrice)}</small></div>
-      </section>
-      <section class="co-card bk-hl"><h2 class="co-h">bKASH PAYMENT</h2>
+    const e = S.ev, bk = esc(BK()), total = priceOf(e) * S.qty;
+    S.step = 2;
+    P('gmt').innerHTML = `<button class="back" id="back-info">← Back to Information</button>${mini(e)}${steps(2)}
+      <section class="co-card bk-hl"><h2 class="co-h">PAYMENT</h2>
+        <div class="total-box"><span>Total amount to pay</span><b>${tk(total)}</b><small>${S.qty} × ${tk(priceOf(e))}</small></div>
         <p class="lbl">Payment to:</p>
         <div class="bk-num"><b id="bk-n">${bk}</b><button class="cta secondary" id="bk-copy" type="button">Copy Number</button></div>
         <h3 class="co-sub">Payment Instructions</h3>
-        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Payment”.</li><li>Send the required amount to ${bk} through bKash Payment.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
+        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Payment”.</li><li>Make the payment of the required amount to ${bk} through bKash Payment.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
       </section>
       <section class="co-card"><h2 class="co-h">PAYMENT DETAILS</h2>
-        <label class="field"><span>bKash Sender Number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX" value="${esc(S.f.b)}"></label>
-        <label class="field"><span>Transaction ID *</span><input id="f-t" autocomplete="off" placeholder="Enter transaction ID" value="${esc(S.f.t)}"></label>
-        <label class="field"><span>Amount Paid *</span><input id="f-a" type="number" inputmode="numeric" min="0" placeholder="৳${total}" value="${esc(S.f.a || total)}"></label>
-        <div id="pay-err"></div>
+        <label class="field"><span>bKash Sender Number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX"></label>
+        <label class="field"><span>Transaction ID *</span><input id="f-t" autocomplete="off" placeholder="Enter transaction ID"></label>
+        <label class="field"><span>Amount Paid *</span><input id="f-a" type="number" inputmode="numeric" min="0" placeholder="${tk(total)}" value="${total}"></label>
+        <div id="f-err"></div>
         <button class="cta big" id="f-go">Submit Payment →</button>
         <p class="pend-note">⏳ Your order will remain pending until our team verifies your bKash payment.</p>
       </section>`;
-    $('#payment-back').onclick = () => screenInfo();
+    $('#back-info').onclick = screenInfo;
     $('#bk-copy').onclick = ev => {
       const b = ev.currentTarget, n = BK();
       b.textContent = 'Copied!'; b.classList.add('copied'); setTimeout(() => { b.textContent = 'Copy Number'; b.classList.remove('copied'); }, 1600);
-      const fallback = () => { try { const t = document.createElement('textarea'); t.value = n; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } catch (x) {} };
+      const fallback = () => { try { const t = document.createElement('textarea'); t.value = n; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } catch (x) {} };
       try { navigator.clipboard.writeText(n).catch(fallback); } catch (x) { fallback(); }
     };
     $('#f-go').onclick = submit;
   }
   async function submit() {
-    const e = S.ev, v = id => $('#' + id).value.trim(), out = $('#pay-err'), btn = $('#f-go'), total = priceOf(e) * S.qty;
-    S.f.b = v('f-b'); S.f.t = v('f-t'); S.f.a = v('f-a');
-    const bad = (id, m) => { out.innerHTML = note(esc(m), 'err'); const f = $('#' + id); if (f) { f.focus(); f.scrollIntoView({ block:'center', behavior:'smooth' }); } };
-    if (!isMob(S.f.b)) return bad('f-b', MSG.INVALID_BKASH_NUMBER);
-    if (!S.f.t) return bad('f-t', MSG.TXN_REQUIRED);
-    if (S.f.a === '') return bad('f-a', 'Please enter the amount you paid.');
-    if (Number(S.f.a) !== total) return bad('f-a', `The amount must match the total (${tk(total)}).`);
+    const e = S.ev, v = id => $('#' + id).value.trim(), out = $('#f-err'), btn = $('#f-go'), total = priceOf(e) * S.qty;
+    const bad = (id, m) => { out.innerHTML = note(esc(m), 'err'); const f = $('#' + id); if (f) { f.focus(); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+    if (S.f.n.length < 2) return bad('f-n', MSG.INVALID_NAME);
+    if (!isMob(S.f.m)) return bad('f-m', MSG.INVALID_MOBILE);
+    if (!S.f.e) return bad('f-e', MSG.EMAIL_REQUIRED);
+    if (!isMail(S.f.e)) return bad('f-e', MSG.INVALID_EMAIL);
+    if (!isMob(v('f-b'))) return bad('f-b', MSG.INVALID_BKASH_NUMBER);
+    if (!v('f-t')) return bad('f-t', MSG.TXN_REQUIRED);
+    if (v('f-a') === '') return bad('f-a', 'Please enter the amount you paid.');
+    if (Number(v('f-a')) !== total) return bad('f-a', `The amount must match the total (${tk(total)}).`);
     btn.disabled = true; btn.textContent = 'Submitting…'; out.innerHTML = '';
     const { data, error } = await sb.rpc('create_order', {
       p_event_id: e.id, p_name: S.f.n, p_mobile: norm(S.f.m), p_email: S.f.e, p_qty: S.qty,
-      p_bkash_number: norm(S.f.b), p_txn: S.f.t, p_amount: Number(S.f.a), p_client_token: S.tok
+      p_bkash_number: norm(v('f-b')), p_txn: v('f-t'), p_amount: Number(v('f-a')), p_client_token: S.tok
     });
     if (error || !data || !data[0]) { out.innerHTML = note(esc(errMsg(error)), 'err'); btn.disabled = false; btn.textContent = 'Submit Payment →'; return; }
     const o = data[0], pre = state(e) === 'preorder';
@@ -191,7 +200,7 @@
       ${facts([['Order ID', o.order_id], ['Event', o.event_name], ['Event date', fmtD(e.event_date)], ['Name', o.customer_name], ['Tickets', o.ticket_quantity], ['Total amount', tk(o.total_amount)], ['Status', 'Pending']])}
       <p class="dim">Save your Order ID. Use it with your mobile number under “Find your ticket” to check your status.${pre ? ' Your ticket will show “To Be Announced” until the date is confirmed.' : ''}</p>
       <button class="cta secondary" id="again">Back to events</button>`;
-    $('#again').onclick = () => screenList(); window.scrollTo(0,0);
+    $('#again').onclick = () => screenList(); window.scrollTo(0, 0);
   }
   function renderResult(r, el) {
     if (!r) { el.innerHTML = note('No order found. Please check your Order ID and mobile number.', 'err'); return; }
@@ -261,7 +270,7 @@
         <div class="cta-row"><label class="field" style="flex:1;min-width:150px"><span>Event</span><select id="a-ev"></select></label>
         <label class="field" style="flex:1;min-width:150px"><span>Date</span><input id="a-d" type="date"></label></div>
         <div id="a-list"><p class="dim">Loading orders…</p></div></section>
-      <section data-view="events" hidden><h2 class="sec">Events</h2><p class="dim">Pre-Order lets customers buy before a date is announced. Ticket prices are set per event.</p><div id="a-events"></div></section>
+      <section data-view="events" hidden><h2 class="sec">Events</h2><p class="dim">Pre-Order lets customers buy before a date is announced. Ticket price is shown from each event's configured price.</p><div id="a-events"></div></section>
       <section data-view="verify" hidden><h2 class="sec">Verify Tickets</h2><div class="cta-row" style="align-items:flex-end"><label class="field" style="flex:1;min-width:200px;margin:0"><span>Ticket ID</span><input id="v-id" placeholder="NB-BTC26-000123"></label><button class="cta" id="v-go">Check</button></div><div id="v-res"></div>
       <p class="dim">To scan a QR code, use your phone camera. It opens the verification page, where you can mark the ticket as used while logged in.</p></section>
       </main></div>`;
@@ -348,34 +357,11 @@
   }
 
   // ---------- PUBLIC TICKETS PAGE (from the Supabase events table) ----------
-  const FEATURED_CONCERT = {
-    name: 'LINKIN PARK: LIVE IN NAOGAON',
-    type: 'Outdoor Concert',
-    event_date: '2026-10-23',
-    event_time: '4:00 PM - 9:00 PM',
-    venue: 'A-Team Field, Naogaon',
-    entry_price: 5500,
-    image_url: 'linkin-park-naogaon.jpg',
-    _featured: true
-  };
-
-  const featuredCard = e => `<article class="ev-card featured-concert">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
-    <p class="ev-type">${esc(e.type)}</p><p>📅 Friday, 23 October 2026</p><p>🕐 ${esc(e.event_time)}</p><p>📍 ${esc(e.venue)}</p>
-    <div class="ev-foot"><b class="price">${tk(e.entry_price)} <small>/ person</small></b>
-    <button class="cta" type="button" data-featured-preorder>Pre-Order Ticket →</button></div></div></article>`;
-
   async function renderTickets() {
     if (!sb) return;
-    try { await loadEvents(); } catch (e) { return; }
+    try { await loadEvents(); } catch (e) { return; }          // keep the static fallback if the database is unreachable
     const up = S.events.filter(e => state(e) !== 'past');
-    const dbFeatured = S.events.find(e => String(e.name).trim().toLowerCase() === FEATURED_CONCERT.name.toLowerCase());
-    const featuredHtml = dbFeatured ? eventCard(dbFeatured) : featuredCard(FEATURED_CONCERT);
-    P('tickets').innerHTML = '<h1>Tickets</h1><p class="dim">Select an event to book your ticket</p>' + featuredHtml + (up.length ? up.filter(e => !dbFeatured || e.id !== dbFeatured.id).map(eventCard).join('') : '');
-    const featuredBtn = P('tickets').querySelector('[data-featured-preorder]');
-    if (featuredBtn) featuredBtn.onclick = () => {
-      P('tickets').innerHTML = '<h1>Tickets</h1>' + note('<b>LINKIN PARK: LIVE IN NAOGAON</b><br>Pre-order checkout will be enabled after the event is added to Supabase.', 'ok') + '<button class="cta secondary" id="featured-back">← Back to events</button>';
-      $('#featured-back').onclick = renderTickets;
-    };
+    P('tickets').innerHTML = '<h1>Tickets</h1><p class="dim">Select an event to book your ticket</p>' + (up.length ? up.map(eventCard).join('') : '<p class="dim">No upcoming events right now. Check back soon.</p>');
   }
 
   // ---------- routing / wiring ----------
