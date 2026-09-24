@@ -342,7 +342,7 @@
   </section>
 
   <section id="panel-services" class="panel" role="tabpanel" aria-labelledby="tab-services" hidden>
-    <h1>What We Do</h1>
+    <h1>What We Do?</h1>
     <article class="news">
       <h2>Concert Management</h2>
       <p class="dim">Professional planning and coordination for live concerts, music shows and large-scale performances.</p>
@@ -352,9 +352,18 @@
       <p class="dim">Complete event planning and execution for cultural, educational, corporate and private events.</p>
     </article>
     <article class="news">
-      <h2>Artist &amp; Band Booking</h2>
-      <p class="dim">Artist and band coordination, communication and performance arrangements.</p>
+      <h2>Band &amp; Artist Booking</h2>
+      <p class="dim">Choose your preferred band or artist from our curated list. Tell us who you want to perform at your event, and we'll handle the booking coordination and discuss the show budget with you.</p>
     </article>
+    <div class="subsection">
+      <h2>Choose Your Band</h2>
+      <p class="dim">Looking for the right artist for your event? Browse our Bangladeshi Bands List and choose the band or artist you'd like to bring to your event through Northern Broadcast.</p>
+      <p class="dim">Availability and booking will be confirmed upon inquiry.</p>
+      <div class="cta-row">
+        <a class="cta" href="Bangladeshi-Band-List.pdf" target="_blank" rel="noopener">View Band &amp; Artist List →</a>
+      </div>
+    </div>
+
     <article class="news">
       <h2>Production Coordination</h2>
       <p class="dim">Coordination with sound, lighting, stage, decoration and technical production teams.</p>
@@ -550,25 +559,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script src="ticketing.js"></script>
-<script>
-  // Ticket cards: display the unit as "person" without changing price or checkout logic.
-  (() => {
-    const panel = document.getElementById('panel-tickets');
-    const replaceUnit = () => {
-      if (!panel) return;
-      const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT);
-      const nodes = [];
-      let node;
-      while (node = walker.nextNode()) nodes.push(node);
-      nodes.forEach(textNode => {
-        if (/ticket/i.test(textNode.nodeValue)) {
-          textNode.nodeValue = textNode.nodeValue.replace(/ticket/gi, 'person');
-        }
-      });
-    };
-    replaceUnit();
-    if (panel) new MutationObserver(replaceUnit).observe(panel, { childList: true, subtree: true });
-  })();
-</script>
 </body>
 </html>
