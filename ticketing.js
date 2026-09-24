@@ -6,7 +6,8 @@
   const sb = window.supabase && C.SUPABASE_URL && !/PASTE/.test(C.SUPABASE_URL)
     ? window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY) : null;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const PRICE = 250;   // fixed ticket price (BDT) for every event
+  const PRICE = 250;   // default ticket price (BDT) when an event has no entry_price
+  const priceOf = e => Number(e && e.entry_price) > 0 ? Number(e.entry_price) : PRICE;
   const tk = n => '৳' + Number(n).toLocaleString('en-US');
   const today = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);   // Dhaka date
   const fmtD = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'To Be Announced';
@@ -27,7 +28,7 @@
 
   // ---------- mount panels ----------
   const foot = $('footer.site');
-  ['admin', 'verify'].forEach(id => { const s = document.createElement('section'); s.id = 'panel-' + id; s.className = 'panel tx'; s.hidden = true; foot.parentNode.insertBefore(s, foot); });
+  ['gmt', 'admin', 'verify'].forEach(id => { const s = document.createElement('section'); s.id = 'panel-' + id; s.className = 'panel tx'; s.hidden = true; foot.parentNode.insertBefore(s, foot); });
   const P = id => $('#panel-' + id);
   { const tp = $('#panel-tickets'); if (tp) tp.classList.add('tx'); }
   const go = id => window.show(id);
@@ -80,23 +81,23 @@
     const s = state(e);
     return `<article class="ev-card">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
       ${e.type ? `<p class="ev-type">${esc(e.type)}</p>` : ''}<p>📅 ${fmtD(e.event_date)}</p>${e.event_time ? `<p>🕐 ${esc(e.event_time)}</p>` : ''}${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}
-      <div class="ev-foot"><b class="price">${tk(PRICE)} <small>/ ticket</small></b>
+      <div class="ev-foot"><b class="price">${tk(priceOf(e))} <small>/ ticket</small></b>
       ${buyable(e) ? `<button class="cta" data-eid="${e.id}">${BTN[s]} →</button>` : `<span class="pill">${BTN[s]}</span>`}</div></div></article>`;
   };
   const mini = (e, extra = '') => `<div class="mini">${poster(e)}<div><b>${esc(e.name)}</b><p>📅 ${fmtD(e.event_date)}</p>${e.venue ? `<p>📍 ${esc(e.venue)}</p>` : ''}${extra}</div></div>`;
 
   async function openGMT(id) {
-    go('tickets');
-    if (!sb) { P('tickets').innerHTML = note('Online ticketing is being set up. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
-    P('tickets').innerHTML = '<p class="dim">Loading events…</p>';
-    try { await loadEvents(); } catch (e) { P('tickets').innerHTML = note('Could not load events. Please refresh and try again.', 'err'); return; }
+    go('gmt');
+    if (!sb) { P('gmt').innerHTML = note('Online ticketing is being set up. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
+    P('gmt').innerHTML = '<p class="dim">Loading events…</p>';
+    try { await loadEvents(); } catch (e) { P('gmt').innerHTML = note('Could not load events. Please refresh and try again.', 'err'); return; }
     const ev = id && (S.events.find(x => x.id === id) || S.events.find(x => x.code === id));   // event.id is canonical; code kept only as a fallback
     if (ev && buyable(ev)) return start(ev);
     screenList(ev ? note(`${esc(ev.name)}: ${BTN[state(ev)].toLowerCase()}.`) : '');
   }
   function screenList(top = '') {
     const logo = ($('img.logo') || {}).src || '', up = S.events.filter(e => state(e) !== 'past');
-    P('tickets').innerHTML = `<section class="hero-tx">${logo ? `<img class="hero-logo" src="${logo}" alt="Northern Broadcast">` : ''}
+    P('gmt').innerHTML = `<section class="hero-tx">${logo ? `<img class="hero-logo" src="${logo}" alt="Northern Broadcast">` : ''}
       <h1>Live Music Brings People Together</h1><p>Concerts · Events · Unforgettable Moments</p><button class="cta big" id="hero-cta">Get My Ticket →</button></section>
       ${top}<div id="gmt-body"><h2 class="sec">Upcoming Events</h2><p class="dim">Select an event to book your ticket</p>
       ${up.length ? up.map(eventCard).join('') : '<p class="dim">No upcoming events right now. Check back soon.</p>'}</div>
@@ -112,8 +113,8 @@
     screenInfo();
   }
   function screenInfo() {
-    const e = S.ev, pre = state(e) === 'preorder', bk = esc(BK()); let touched = false;
-    P('tickets').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
+    const e = S.ev, pre = state(e) === 'preorder', bk = esc(BK()), unitPrice = priceOf(e); let touched = false;
+    P('gmt').innerHTML = `<button class="back" id="back">← All events</button>${mini(e)}
       ${pre ? note('<b>Pre-Order</b><br>Your pre-order secures your ticket. The event date will appear on your e-ticket as soon as it is announced.', 'ok') : ''}
       <section class="co-card"><h2 class="co-h">YOUR INFORMATION</h2>
         <label class="field"><span>Full Name *</span><input id="f-n" autocomplete="name" placeholder="Enter your full name"></label>
@@ -123,20 +124,20 @@
       </section>
       <section class="co-card bk-hl"><h2 class="co-h">PAY VIA bKASH</h2>
         <div class="total-box"><span>Total amount to pay</span><b id="tt"></b><small id="tq"></small></div>
-        <p class="lbl">Send Money to:</p>
+        <p class="lbl">Payment to:</p>
         <div class="bk-num"><b id="bk-n">${bk}</b><button class="cta secondary" id="bk-copy" type="button">Copy Number</button></div>
         <h3 class="co-sub">Payment Instructions</h3>
-        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Payment”.</li><li>Make the payment of the required amount to ${bk}.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
+        <ol class="bk-steps"><li>Open your bKash app.</li><li>Select “Payment”.</li><li>Send the required amount to ${bk} through bKash Payment.</li><li>Complete the payment.</li><li>Enter your transaction details below.</li></ol>
       </section>
       <section class="co-card"><h2 class="co-h">PAYMENT DETAILS</h2>
         <label class="field"><span>bKash Sender Number *</span><input id="f-b" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX"></label>
         <label class="field"><span>Transaction ID *</span><input id="f-t" autocomplete="off" placeholder="Enter transaction ID"></label>
-        <label class="field"><span>Amount Paid *</span><input id="f-a" type="number" inputmode="numeric" min="0" placeholder="৳250"></label>
+        <label class="field"><span>Amount Paid *</span><input id="f-a" type="number" inputmode="numeric" min="0" placeholder="৳${unitPrice}"></label>
         <div id="f-err"></div>
         <button class="cta big" id="f-go">Submit Payment →</button>
         <p class="pend-note">⏳ Your order will remain pending until our team verifies your bKash payment.</p>
       </section>`;
-    const upd = () => { const t = PRICE * S.qty; $('#qn').textContent = S.qty; $('#tt').textContent = tk(t); $('#tq').textContent = `${S.qty} × ${tk(PRICE)}`; if (!touched) $('#f-a').value = t; };
+    const upd = () => { const t = unitPrice * S.qty; $('#qn').textContent = S.qty; $('#tt').textContent = tk(t); $('#tq').textContent = `${S.qty} × ${tk(unitPrice)}`; if (!touched) $('#f-a').value = t; };
     upd();
     $('#f-a').oninput = () => { touched = true; };
     $('#qm').onclick = () => { S.qty = Math.max(1, S.qty - 1); upd(); }; $('#qp').onclick = () => { S.qty = Math.min(10, S.qty + 1); upd(); };
@@ -150,7 +151,7 @@
     $('#f-go').onclick = submit;
   }
   async function submit() {
-    const e = S.ev, v = id => $('#' + id).value.trim(), out = $('#f-err'), btn = $('#f-go'), total = PRICE * S.qty;
+    const e = S.ev, v = id => $('#' + id).value.trim(), out = $('#f-err'), btn = $('#f-go'), total = priceOf(e) * S.qty;
     const bad = (id, m) => { out.innerHTML = note(esc(m), 'err'); const f = $('#' + id); if (f) { f.focus(); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
     if (v('f-n').length < 2) return bad('f-n', MSG.INVALID_NAME);
     if (!isMob(v('f-m'))) return bad('f-m', MSG.INVALID_MOBILE);
@@ -167,7 +168,7 @@
     });
     if (error || !data || !data[0]) { out.innerHTML = note(esc(errMsg(error)), 'err'); btn.disabled = false; btn.textContent = 'Submit Payment →'; return; }
     const o = data[0], pre = state(e) === 'preorder';
-    P('tickets').innerHTML = `<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
+    P('gmt').innerHTML = `<div class="done-card"><div class="tick">✓</div><h2 class="sec">Payment Verification Pending</h2>
       <p>Your payment information has been submitted successfully. Our team will verify your transaction.</p></div>
       ${facts([['Order ID', o.order_id], ['Event', o.event_name], ['Event date', fmtD(e.event_date)], ['Name', o.customer_name], ['Tickets', o.ticket_quantity], ['Total amount', tk(o.total_amount)], ['Status', 'Pending']])}
       <p class="dim">Save your Order ID. Use it with your mobile number under “Find your ticket” to check your status.${pre ? ' Your ticket will show “To Be Announced” until the date is confirmed.' : ''}</p>
@@ -242,7 +243,7 @@
         <div class="cta-row"><label class="field" style="flex:1;min-width:150px"><span>Event</span><select id="a-ev"></select></label>
         <label class="field" style="flex:1;min-width:150px"><span>Date</span><input id="a-d" type="date"></label></div>
         <div id="a-list"><p class="dim">Loading orders…</p></div></section>
-      <section data-view="events" hidden><h2 class="sec">Events</h2><p class="dim">Pre-Order lets customers buy before a date is announced. Ticket price is fixed at ${tk(PRICE)} for every event.</p><div id="a-events"></div></section>
+      <section data-view="events" hidden><h2 class="sec">Events</h2><p class="dim">Pre-Order lets customers buy before a date is announced. Ticket prices are set per event.</p><div id="a-events"></div></section>
       <section data-view="verify" hidden><h2 class="sec">Verify Tickets</h2><div class="cta-row" style="align-items:flex-end"><label class="field" style="flex:1;min-width:200px;margin:0"><span>Ticket ID</span><input id="v-id" placeholder="NB-BTC26-000123"></label><button class="cta" id="v-go">Check</button></div><div id="v-res"></div>
       <p class="dim">To scan a QR code, use your phone camera. It opens the verification page, where you can mark the ticket as used while logged in.</p></section>
       </main></div>`;
@@ -304,7 +305,7 @@
   function evList() {
     $('#a-events').innerHTML = A.events.map(e => `<div class="ocard" data-e="${e.id}"><div class="oc-top"><b>${esc(e.name)}</b><span class="pill">${BTN[state(e)]}</span></div>
       <label class="field"><span>Date (leave blank for TBA)</span><input type="date" data-f="d" value="${e.event_date || ''}"></label>
-      <p class="dim" style="margin:0 0 14px">Ticket price: <b>${tk(PRICE)}</b> per ticket (fixed)</p>
+      <p class="dim" style="margin:0 0 14px">Ticket price: <b>${tk(priceOf(e))}</b> per ticket</p>
       <label class="field"><span>Venue</span><input data-f="v" value="${esc(e.venue)}"></label>
       <label class="field"><span>Event image URL (optional)</span><input data-f="i" value="${esc(e.image_url)}"></label>
       <label class="sw"><input type="checkbox" data-f="o" ${e.pre_order_enabled ? 'checked' : ''}> Pre-Order ON</label>
@@ -329,11 +330,34 @@
   }
 
   // ---------- PUBLIC TICKETS PAGE (from the Supabase events table) ----------
+  const FEATURED_CONCERT = {
+    name: 'LINKIN PARK: LIVE IN NAOGAON',
+    type: 'Outdoor Concert',
+    event_date: '2026-10-23',
+    event_time: '4:00 PM - 9:00 PM',
+    venue: 'A-Team Field, Naogaon',
+    entry_price: 5500,
+    image_url: 'linkin-park-naogaon.jpg',
+    _featured: true
+  };
+
+  const featuredCard = e => `<article class="ev-card featured-concert">${poster(e)}<div class="ev-info"><h3>${esc(e.name)}</h3>
+    <p class="ev-type">${esc(e.type)}</p><p>📅 Friday, 23 October 2026</p><p>🕐 ${esc(e.event_time)}</p><p>📍 ${esc(e.venue)}</p>
+    <div class="ev-foot"><b class="price">${tk(e.entry_price)} <small>/ person</small></b>
+    <button class="cta" type="button" data-featured-preorder>Pre-Order Ticket →</button></div></div></article>`;
+
   async function renderTickets() {
-    if (!sb) { P('tickets').innerHTML = note('Online ticketing is not configured yet. Please contact us on WhatsApp: 01511588581.', 'err'); return; }
-    try { await loadEvents(); } catch (e) { P('tickets').innerHTML = note('Could not load ticket events. Please refresh and try again.', 'err'); return; }
+    if (!sb) return;
+    try { await loadEvents(); } catch (e) { return; }
     const up = S.events.filter(e => state(e) !== 'past');
-    P('tickets').innerHTML = '<h1>Tickets</h1><p class="dim">Select an event to book your ticket</p>' + (up.length ? up.map(eventCard).join('') : '<p class="dim">No upcoming events right now. Check back soon.</p>');
+    const dbFeatured = S.events.find(e => String(e.name).trim().toLowerCase() === FEATURED_CONCERT.name.toLowerCase());
+    const featuredHtml = dbFeatured ? eventCard(dbFeatured) : featuredCard(FEATURED_CONCERT);
+    P('tickets').innerHTML = '<h1>Tickets</h1><p class="dim">Select an event to book your ticket</p>' + featuredHtml + (up.length ? up.filter(e => !dbFeatured || e.id !== dbFeatured.id).map(eventCard).join('') : '');
+    const featuredBtn = P('tickets').querySelector('[data-featured-preorder]');
+    if (featuredBtn) featuredBtn.onclick = () => {
+      P('tickets').innerHTML = '<h1>Tickets</h1>' + note('<b>LINKIN PARK: LIVE IN NAOGAON</b><br>Pre-order checkout will be enabled after the event is added to Supabase.', 'ok') + '<button class="cta secondary" id="featured-back">← Back to events</button>';
+      $('#featured-back').onclick = renderTickets;
+    };
   }
 
   // ---------- routing / wiring ----------
@@ -344,6 +368,7 @@
   }
   document.addEventListener('click', e => { const a = e.target.closest('[data-eid],[data-buy]'); if (a) { e.preventDefault(); openGMT(a.dataset.eid || a.dataset.buy); } });
   const tt = $('#tab-tickets'); if (tt) tt.addEventListener('click', renderTickets);
+  const gt = $('#tab-gmt'); if (gt) gt.addEventListener('click', () => openGMT());
   window.addEventListener('hashchange', route);
   route();
   renderTickets();
