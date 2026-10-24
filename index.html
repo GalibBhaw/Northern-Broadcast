@@ -601,9 +601,7 @@
   tabs.forEach(tab => tab.addEventListener('click', () => show(tab.id.replace('tab-', ''))));
   document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); show(a.dataset.go); }));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="config.js"></script>
 <script src="ticketing.js"></script>
 </body>
 </html>
